@@ -1,4 +1,64 @@
+import { useEffect, useState } from 'react'
+
+type ApiStatus = 'checking' | 'ready' | 'error'
+
+type HealthResponse = {
+  status: string
+  database?: string
+}
+
 function App() {
+  const [apiStatus, setApiStatus] =
+    useState<ApiStatus>('checking')
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function checkApiHealth() {
+      try {
+        const response = await fetch('/api/health', {
+          signal: controller.signal,
+          headers: {
+            Accept: 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error('API health check failed')
+        }
+
+        const data = (await response.json()) as HealthResponse
+
+        if (
+          data.status !== 'ok' ||
+          data.database !== 'connected'
+        ) {
+          throw new Error('Invalid API health response')
+        }
+
+        if (!controller.signal.aborted) {
+          setApiStatus('ready')
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setApiStatus('error')
+        }
+      }
+    }
+
+    void checkApiHealth()
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
+
+  const apiStatusText = {
+    checking: 'Memeriksa koneksi API...',
+    ready: 'API dan database terhubung',
+    error: 'API belum terhubung',
+  }[apiStatus]
+
   return (
     <main className="dashboard-page">
       <header className="dashboard-header">
@@ -18,14 +78,15 @@ function App() {
 
       <section className="dashboard-card">
         <div className="section-label">
-          FONDASI FRONTEND
+          FONDASI APLIKASI
         </div>
 
         <h1>FTU Dashboard berhasil dijalankan.</h1>
 
         <p className="description">
-          Aplikasi React dan TypeScript telah
-          berhasil disiapkan melalui Docker dan Nginx.
+          Frontend React, Laravel API, dan MySQL
+          sedang dipersiapkan untuk sistem
+          pemantauan proyek engineering.
         </p>
 
         <div className="status-row">
@@ -33,8 +94,15 @@ function App() {
             Frontend siap
           </span>
 
-          <span className="status-note">
-            Data proyek akan tersedia setelah API dibuat.
+          <span
+            className={
+              apiStatus === 'ready'
+                ? 'status-badge'
+                : 'status-note'
+            }
+            role="status"
+          >
+            {apiStatusText}
           </span>
         </div>
       </section>
