@@ -1,0 +1,163 @@
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-600.css";
+
+:root {
+  font-family: "Inter", sans-serif;
+  font-synthesis: none;
+
+  --color-background: #FFFFFF;
+  --color-text: #14171F;
+  --color-muted: #5B6472;
+  --color-border: #E6E8EE;
+
+  --color-primary: #5B4BC4;
+  --color-amber: #F6B531;
+  --color-critical: #D62B1F;
+  --color-success: #2FA36B;
+
+  --card-radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.dashboard-page {
+  max-width: 1920px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 48px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.logo-placeholder {
+  width: 116px;
+  min-height: 76px;
+  flex-shrink: 0;
+  border: 1px dashed var(--color-primary);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.logo-placeholder span {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 24px;
+}
+
+.brand-info span {
+  color: var(--color-muted);
+}
+
+.dashboard-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 56px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  box-shadow: 0 4px 20px rgba(20, 23, 31, 0.04);
+}
+
+.section-label {
+  color: var(--color-primary);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+h1 {
+  max-width: 1100px;
+  margin: 0;
+  font-size: clamp(44px, 4vw, 76px);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.description {
+  max-width: 1000px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 28px;
+  line-height: 1.5;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.status-badge {
+  padding: 12px 20px;
+  border-radius: 100px;
+  background: #E7F5EC;
+  color: #20794E;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.status-note {
+  color: var(--color-muted);
+  font-size: 24px;
+}
+
+.dashboard-footer {
+  color: var(--color-muted);
+  font-size: 24px;
+}
+
+@media (max-width: 800px) {
+  .dashboard-page {
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .dashboard-header {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-card {
+    padding: 28px;
+  }
+
+  .description {
+    font-size: 24px;
+  }
+}
