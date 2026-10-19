@@ -72,4 +72,9 @@ class Project extends Model
     {
         return $this->hasMany(Alert::class);
     }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }
