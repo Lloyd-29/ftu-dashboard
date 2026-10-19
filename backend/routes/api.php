@@ -20,3 +20,6 @@ Route::get('/health', static function (): JsonResponse {
         'database' => 'connected',
     ]);
 });
+
+// DEMO-ONLY: Public dashboard route for the local supervisor demo.
+\Illuminate\Support\Facades\Route::get('/dashboard', \App\Http\Controllers\Api\DashboardController::class);
