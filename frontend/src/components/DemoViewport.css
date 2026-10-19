@@ -1,0 +1,42 @@
+/* DEMO-ONLY: Reserve a footer row inside a laptop browser viewport. */
+@media (min-width: 1201px) and (max-height: 880px) {
+  .dashboard-shell {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .dashboard-shell .dashboard-header { min-height: 68px; max-height: 68px; flex: 0 0 68px; }
+  .dashboard-shell .brand-logo { width: 58px; height: 58px; }
+  .dashboard-shell .header-clock strong { font-size: 32px; }
+  .dashboard-shell .connection-row { min-height: 18px; flex: 0 0 18px; }
+  .dashboard-shell .slide-view { min-height: 0; flex: 1 1 auto; overflow: hidden; }
+  .dashboard-shell .slide-view .slide-heading { margin-top: 0; margin-bottom: 8px; }
+  .dashboard-shell .slide-heading h1 { font-size: 33px; }
+  .dashboard-shell .slide-eyebrow { margin-bottom: 3px; font-size: 12px; }
+  .dashboard-shell .slide-date { font-size: 15px; }
+  .dashboard-shell .dashboard-footer { flex: 0 0 32px; min-height: 32px; margin-top: 0; }
+  .dashboard-shell .summary-layout { gap: 7px; }
+  .dashboard-shell .summary-kpi { padding: 5px 12px; }
+  .dashboard-shell .summary-panel__head { min-height: 43px; padding: 5px 12px; }
+  .dashboard-shell .summary-project-head { padding: 4px 12px; }
+  .dashboard-shell .summary-project-row { min-height: 35px; padding: 3px 12px; }
+  .dashboard-shell .summary-project-info { gap: 2px; }
+  .dashboard-shell .summary-alert-row { min-height: 38px; padding: 3px 9px; }
+  .dashboard-shell .summary-alert-text { gap: 2px; }
+  .dashboard-shell .client-layout { gap: 7px; }
+  .dashboard-shell .client-overview { min-height: 34px; padding: 3px 12px; }
+  .dashboard-shell .client-grid { gap: 7px 10px; }
+  .dashboard-shell .client-card { padding: 6px 11px; }
+  .dashboard-shell .client-card__head { margin-bottom: 4px; }
+  .dashboard-shell .client-card__notes { gap: 3px; }
+  .dashboard-shell .client-card__note p { line-height: 1.2; }
+  .dashboard-shell .workload-layout { gap: 8px; }
+  .dashboard-shell .workload-kpi { padding: 5px 12px; }
+  .dashboard-shell .workload-kpi strong { font-size: 28px; }
+  .dashboard-shell .workload-card { padding: 7px 11px 6px; }
+  .dashboard-shell .workload-grid { gap: 7px 10px; }
+}
