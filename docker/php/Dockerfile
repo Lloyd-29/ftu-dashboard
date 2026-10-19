@@ -6,10 +6,12 @@ RUN apt-get update \
         unzip \
         libzip-dev \
         libonig-dev \
+        libicu-dev \
     && docker-php-ext-install \
         pdo_mysql \
         mbstring \
         zip \
+        intl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
