@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import SummarySlide from './components/SummarySlide';
+import ClientNotesSlide from './components/ClientNotesSlide';
 import type { DashboardData } from './types/dashboard';
 import './App.css';
 
@@ -40,10 +42,7 @@ function useDashboard() {
       const request = new AbortController();
       pending = request;
 
-      const timeout = window.setTimeout(
-        () => request.abort(),
-        8_000
-      );
+      const timeout = window.setTimeout(() => request.abort(), 8_000);
 
       try {
         const response = await fetch('/api/dashboard', {
@@ -70,10 +69,7 @@ function useDashboard() {
         if (mounted) setIsOffline(true);
       } finally {
         window.clearTimeout(timeout);
-
-        if (pending === request) {
-          pending = null;
-        }
+        if (pending === request) pending = null;
       }
     }
 
@@ -95,7 +91,6 @@ function useDashboard() {
 
 function App() {
   const { data, isOffline, lastReceivedAt } = useDashboard();
-
   const [now, setNow] = useState(() => new Date());
   const [page, setPage] = useState(0);
 
@@ -115,10 +110,7 @@ function App() {
   const isDisconnected = isOffline || isStale;
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setNow(new Date());
-    }, 1_000);
-
+    const interval = window.setInterval(() => setNow(new Date()), 1_000);
     return () => window.clearInterval(interval);
   }, []);
 
@@ -142,12 +134,7 @@ function App() {
     <div className={`dashboard-shell${isLite ? ' lite' : ''}`}>
       <header className="dashboard-header">
         <div className="brand">
-          <img
-            className="brand-logo"
-            src="/ftu-logo.png"
-            alt="Logo FTU"
-          />
-
+          <img className="brand-logo" src="/ftu-logo.png" alt="Logo FTU" />
           <div className="brand-copy">
             <strong>PT Filosofi Teknik Utama</strong>
             <span>Dashboard Proyek Engineering</span>
@@ -173,10 +160,7 @@ function App() {
       </header>
 
       <div className="connection-row" aria-live="polite">
-        <span
-          className={`connection-dot${isDisconnected ? ' offline' : ''}`}
-        />
-
+        <span className={`connection-dot${isDisconnected ? ' offline' : ''}`} />
         <span>
           {isDisconnected
             ? 'Koneksi terganggu'
@@ -184,12 +168,8 @@ function App() {
               ? 'Terhubung'
               : 'Menghubungkan...'}
         </span>
-
         <span className="connection-separator">·</span>
-
-        <span>
-          Diperbarui {formatTime(data?.last_updated_at ?? null)}
-        </span>
+        <span>Diperbarui {formatTime(data?.last_updated_at ?? null)}</span>
       </div>
 
       {isDisconnected && (
@@ -199,17 +179,12 @@ function App() {
         </div>
       )}
 
-      <main
-        key={page}
-        className="slide-view"
-        aria-label={PAGES[page]}
-      >
+      <main key={page} className="slide-view" aria-label={PAGES[page]}>
         <div className="slide-heading">
           <div>
             <p className="slide-eyebrow">MONITORING PROYEK</p>
             <h1>{PAGES[page]}</h1>
           </div>
-
           <span className="slide-date">{currentDate}</span>
         </div>
 
@@ -219,51 +194,27 @@ function App() {
               ? 'API belum dapat dihubungi. Periksa koneksi Laravel.'
               : 'Memuat data dashboard...'}
           </section>
+        ) : page === 0 ? (
+          <SummarySlide data={data} />
+        ) : page === 1 ? (
+          <ClientNotesSlide data={data} />
         ) : (
           <div className="shell-preview">
-            {page === 0 && (
-              <>
-                <section className="preview-card">
-                  <h2>Proyek Aktif</h2>
-                  <strong>{data.summary.total_projects}</strong>
-                </section>
-
-                <section className="preview-card">
-                  <h2>Perlu Perhatian</h2>
-                  <strong>{data.summary.active_alerts}</strong>
-                </section>
-
-                <section className="preview-card">
-                  <h2>Temuan Terbuka</h2>
-                  <strong>{data.summary.findings_open}</strong>
-                </section>
-              </>
-            )}
-
-            {page === 1 && (
-              <section className="preview-card wide">
-                <h2>Catatan Klien Tersedia</h2>
-                <strong>{data.latest_client_notes.length}</strong>
-              </section>
-            )}
-
+            {/* DEMO-ONLY: Workload and schedule slides are pending. */}
             {page === 2 && (
               <section className="preview-card wide">
                 <h2>Engineer Aktif</h2>
                 <strong>{data.engineer_workload.length}</strong>
               </section>
             )}
-
             {page === 3 && (
               <section className="preview-card wide">
                 <h2>Riwayat Progres Proyek</h2>
                 <strong>{data.s_curve.length}</strong>
               </section>
             )}
-
             <p className="preview-note">
-              Kerangka slideshow aktif. Konten slide lengkap
-              ditambahkan pada batch berikutnya.
+              Konten slide lengkap ditambahkan pada batch berikutnya.
             </p>
           </div>
         )}
@@ -278,11 +229,9 @@ function App() {
             />
           ))}
         </div>
-
         <span className="page-count">
           Halaman {page + 1} dari {PAGES.length}
         </span>
-
         <div
           className="rotation-track"
           aria-label={`Ganti halaman setiap ${rotationSeconds} detik`}
