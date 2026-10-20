@@ -1,148 +1,144 @@
+import { useEffect, useState } from 'react';
 import type { DashboardData } from '../types/dashboard';
+import StackedBar, { projectColor } from './StackedBar';
 import './WorkloadSlide.css';
 
 type Props = { data: DashboardData };
 type Engineer = DashboardData['engineer_workload'][number];
 
 const PROJECT_COLORS = [
-  '#5B4BC4', '#287FAD', '#37957B', '#8C6DCA',
-  '#C18B25', '#4B78A6', '#578F51', '#826CC0',
+  '#5B4BC4', '#F6B531', '#76A1A7', '#AD9CFC',
+  '#8AA2C1', '#2FA36B', '#9D78C9', '#3E78C0',
 ] as const;
 
-function capacityLabel(percent: number): string {
-  if (percent > 100) return 'Berlebih';
-  if (percent >= 80) return 'Hampir penuh';
-  return 'Tersedia';
+function useCountUp(): number {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const lite = new URLSearchParams(window.location.search).get('lite') === '1';
+    if (lite || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setProgress(1);
+      return;
+    }
+
+    // DEMO-ONLY: A lightweight shared count-up for the presentation slide.
+    let frame = 0;
+    const start = performance.now();
+    const tick = (time: number) => {
+      const fraction = Math.min(1, (time - start) / 650);
+      setProgress(1 - (1 - fraction) ** 3);
+      if (fraction < 1) frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  return progress;
 }
 
 export default function WorkloadSlide({ data }: Props) {
   const engineers = [...data.engineer_workload].sort(
     (a, b) => b.total_allocation_percent - a.total_allocation_percent ||
-      a.name.localeCompare(b.name),
+      a.name.localeCompare(b.name, 'id-ID'),
   );
+  const assigned = engineers.filter((engineer) => engineer.assignments.length > 0).length;
+  const nearlyFull = engineers.filter((engineer) =>
+    engineer.total_allocation_percent >= 80 && engineer.total_allocation_percent <= 100,
+  ).length;
+  const available = engineers.filter((engineer) => engineer.total_allocation_percent < 80).length;
+  const overloaded = engineers.filter((engineer) => engineer.total_allocation_percent > 100).length;
+  const mostAvailable = [...engineers]
+    .filter((engineer) => engineer.total_allocation_percent < 100)
+    .sort((a, b) => a.total_allocation_percent - b.total_allocation_percent || a.name.localeCompare(b.name, 'id-ID'))
+    .slice(0, 3);
 
-  const active = engineers.filter((engineer) => engineer.assignments.length > 0).length;
-  const nearlyFull = engineers.filter(
-    (engineer) => engineer.total_allocation_percent >= 80 &&
-      engineer.total_allocation_percent <= 100,
-  ).length;
-  const available = engineers.filter(
-    (engineer) => engineer.total_allocation_percent < 80,
-  ).length;
-  const overallocated = engineers.filter(
-    (engineer) => engineer.total_allocation_percent > 100,
-  ).length;
+  // DEMO-ONLY: Fixed palette in project-code order; every legend swatch matches its segment.
+  const projectCodes = [...new Set([
+    ...data.projects.map((project) => project.code),
+    ...engineers.flatMap((engineer) => engineer.assignments.map((assignment) => assignment.project_code)),
+  ])].sort((a, b) => a.localeCompare(b));
+  const colors = new Map(projectCodes.map((code, index): [string, string] => [
+    code, PROJECT_COLORS[index % PROJECT_COLORS.length] ?? projectColor(code),
+  ]));
 
-  // DEMO-ONLY: Fixed single-panel capacity view, with a visible 100% reference.
-  const chartMax = Math.max(
-    120,
-    Math.ceil(Math.max(100, ...engineers.map(
-      (engineer) => engineer.total_allocation_percent,
-    )) / 10) * 10,
-  );
-  const capacityPosition = (100 / chartMax) * 100;
-  const projectColors = new Map<string, string>(
-    data.projects.map((project, index): [string, string] => [
-      project.code,
-      PROJECT_COLORS[index % PROJECT_COLORS.length],
-    ]),
-  );
+  const progress = useCountUp();
+  const animated = (value: number) => Math.round(value * progress);
 
   return (
-    <section className="workload-layout" aria-label="Beban kerja engineer">
-      <div className="workload-kpis">
-        <article className="workload-kpi">
-          <span>Engineer Aktif</span><strong>{active}</strong>
-        </article>
-        <article className="workload-kpi workload-kpi--amber">
-          <span>Hampir Penuh (80–100%)</span><strong>{nearlyFull}</strong>
-        </article>
-        <article className="workload-kpi workload-kpi--green">
-          <span>Tersedia (&lt;80%)</span><strong>{available}</strong>
-        </article>
-        <article className="workload-kpi workload-kpi--red">
-          <span>Beban Berlebih (&gt;100%)</span><strong>{overallocated}</strong>
-        </article>
-      </div>
-
-      <div className="workload-headline">
-        <div>
-          <strong>Alokasi per Engineer</strong>
-          <span>Gabungan seluruh proyek aktif · garis batas 100%</span>
+    <section className="workload-aligned" aria-label="Beban kerja per engineer">
+      <article className="workload-panel workload-panel--chart">
+        <h2>Beban Kerja per Engineer</h2>
+        <div className="workload-legend" aria-label="Warna berdasarkan proyek">
+          {projectCodes.map((code) => (
+            <span className="workload-legend__item" key={code}>
+              <span className="workload-legend__swatch" style={{ backgroundColor: colors.get(code) }} />
+              <span>{code}</span>
+            </span>
+          ))}
         </div>
-        <div className="workload-headline__badge">
-          {engineers.length} engineer · {overallocated} melebihi kapasitas
+
+        <div className="workload-plot__axis" aria-hidden="true">
+          <div className="workload-plot__capacity-label"><span>Kapasitas 100%</span></div>
         </div>
-      </div>
 
-      {engineers.length === 0 ? (
-        <div className="workload-empty">Belum ada data alokasi engineer.</div>
-      ) : (
-        <div className="workload-grid">
-          {engineers.map((engineer: Engineer, index: number) => {
-            const percent = engineer.total_allocation_percent;
-            const availableCapacity = Math.max(0, 100 - percent);
-            const tone = percent > 100 ? 'red' : percent >= 80 ? 'amber' : 'green';
-
-            return (
-              <article
-                key={engineer.name}
-                className={`workload-card workload-card--${tone}`}
-                style={{ animationDelay: `${index * 35}ms` }}
-              >
-                <div className="workload-card__head">
-                  <strong title={engineer.name}>{engineer.name}</strong>
-                  <span className={`workload-card__status workload-card__status--${tone}`}>
-                    {capacityLabel(percent)}
-                  </span>
-                  <b>{percent}%</b>
-                </div>
-
-                <div className="workload-card__chart">
-                  <div className="workload-card__bar" aria-hidden="true">
-                    <div
-                      className="workload-card__segments"
-                      style={{ width: `${(percent / chartMax) * 100}%` }}
-                    >
-                      {engineer.assignments.map((assignment) => (
-                        <span
-                          key={assignment.project_code}
-                          className="workload-card__segment"
-                          style={{
-                            width: percent > 0
-                              ? `${(assignment.allocation_percent / percent) * 100}%`
-                              : '0%',
-                            background: projectColors.get(assignment.project_code) ?? '#8A93A3',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span
-                      className="workload-card__capacity"
-                      style={{ left: `${capacityPosition}%` }}
-                    />
+        {engineers.length === 0 ? (
+          <div className="workload-empty">Belum ada data alokasi engineer.</div>
+        ) : (
+          <div className="workload-rows">
+            {engineers.map((engineer: Engineer, index) => {
+              const total = engineer.total_allocation_percent;
+              return (
+                <div className="workload-row" key={engineer.name} style={{ animationDelay: `${index * 40}ms` }}>
+                  <span className="workload-row__name" title={engineer.name}>{engineer.name}</span>
+                  <StackedBar assignments={engineer.assignments} total={total} max={120} colors={colors} />
+                  <div className="workload-row__result">
+                    <strong className={total > 100 ? 'is-overloaded' : undefined}>{animated(total)}%</strong>
+                    {total > 100 && <span className="workload-row__over-pill">Berlebih</span>}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+        <p className="workload-caption">Data simulasi · Alokasi lintas proyek, bukan jam kerja aktual.</p>
+      </article>
 
-                <div className="workload-card__details">
-                  <span className="workload-card__assignments">
-                    {engineer.assignments.map((assignment) => (
-                      <span key={assignment.project_code} className="workload-card__project">
-                        <i style={{ background: projectColors.get(assignment.project_code) ?? '#8A93A3' }} />
-                        {assignment.project_code} {assignment.allocation_percent}%
-                      </span>
-                    ))}
-                  </span>
-                  <span className="workload-card__remaining">
-                    {percent > 100 ? `+${percent - 100}% berlebih` : `${availableCapacity}% sisa`}
-                  </span>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
-      <p className="workload-caption">Data simulasi · Persentase alokasi lintas proyek, bukan jam kerja aktual.</p>
+      <aside className="workload-sidebar">
+        <section className="workload-panel workload-summary">
+          <h2>Ringkasan</h2>
+          <div className="workload-summary__stat">
+            <strong className="workload-summary__number">{animated(assigned)}</strong>
+            <div><h3>Aktif</h3><p>Engineer dengan penugasan proyek</p></div>
+          </div>
+          <div className="workload-summary__stat">
+            <strong className="workload-summary__number is-amber">{animated(nearlyFull)}</strong>
+            <div><h3>Hampir penuh</h3><p>Alokasi 80–100% dari kapasitas</p></div>
+          </div>
+          <div className="workload-summary__stat">
+            <strong className="workload-summary__number is-green">{animated(available)}</strong>
+            <div><h3>Tersedia</h3><p>Alokasi di bawah 80%</p></div>
+          </div>
+          {overloaded > 0 && <p className="workload-summary__warning">{overloaded} engineer melebihi kapasitas 100%</p>}
+        </section>
+
+        <section className="workload-panel workload-available">
+          <h2>Tersedia Minggu Ini</h2>
+          <p className="workload-available__description">Engineer dengan sisa kapasitas terbesar</p>
+          {mostAvailable.length === 0 ? (
+            <p className="workload-available__empty">Belum ada engineer dengan kapasitas tersisa.</p>
+          ) : mostAvailable.map((engineer) => (
+            <div className="workload-available__row" key={engineer.name}>
+              <div className="workload-available__info">
+                <strong>{engineer.name}</strong>
+                <span>Proyek: {engineer.assignments.length
+                  ? engineer.assignments.map((assignment) => assignment.project_code).join(', ')
+                  : 'Tidak ada penugasan'}</span>
+              </div>
+              <span className="workload-available__remaining">sisa <strong>{100 - engineer.total_allocation_percent}%</strong></span>
+            </div>
+          ))}
+        </section>
+      </aside>
     </section>
   );
 }
