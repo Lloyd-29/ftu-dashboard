@@ -1,100 +1,110 @@
-import type { DashboardClientNote, DashboardData, DashboardProject } from '../types/dashboard';
+import type { DashboardData, DashboardProject } from '../types/dashboard';
+import StatusPill from './StatusPill';
+import { formatRelativeDays, formatShortDate } from '../utils/date';
 import './ClientNotesSlide.css';
 
-type Props = { data: DashboardData };
+type DashboardClientNote = DashboardData['latest_client_notes'][number];
 
-const STATUS_LABELS: Record<DashboardProject['status'], string> = {
-  delayed: 'Terlambat',
-  at_risk: 'Berisiko',
-  on_track: 'Sesuai Rencana',
+type Props = {
+  data: DashboardData;
+  now: Date;
+  remainingMs: number;
+  rotationMs: number;
 };
 
-const STATUS_ORDER: Record<DashboardProject['status'], number> = {
+const STATUS_PRIORITY: Record<DashboardProject['status'], number> = {
   delayed: 0,
   at_risk: 1,
   on_track: 2,
 };
 
-function shortDate(value: string): string {
-  return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'Asia/Jakarta',
-  }).format(new Date(`${value}T12:00:00+07:00`));
+function riskItems(text: string | null): string[] {
+  return (text ?? '')
+    .split(/[;\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 2);
 }
 
-export default function ClientNotesSlide({ data }: Props) {
-  const notesByProject = new Map<string, DashboardClientNote[]>();
+function updatedLabel(project: DashboardProject, now: Date): string {
+  if (!project.updated_at || !project.updated_by_name) {
+    return 'Belum ada pembaruan';
+  }
+  return `${formatRelativeDays(project.updated_at, now)} oleh ${project.updated_by_name}`;
+}
 
+export default function ClientNotesSlide({ data, now, remainingMs, rotationMs }: Props) {
+  const latestNotes = new Map<string, DashboardClientNote>();
   for (const note of data.latest_client_notes) {
     if (!note.project_code) continue;
-    const existing = notesByProject.get(note.project_code) ?? [];
-    existing.push(note);
-    notesByProject.set(note.project_code, existing);
+    const existing = latestNotes.get(note.project_code);
+    if (!existing || note.note_date > existing.note_date ||
+      (note.note_date === existing.note_date && note.id > existing.id)) {
+      latestNotes.set(note.project_code, note);
+    }
   }
 
-  // DEMO-ONLY: Two recent notes per project, arranged for the laptop display.
-  const groups = data.projects
-    .map((project) => ({
-      project,
-      notes: (notesByProject.get(project.code) ?? [])
-        .sort((a, b) => b.note_date.localeCompare(a.note_date) || b.id - a.id)
-        .slice(0, 2),
-    }))
-    .filter((group) => group.notes.length > 0)
-    .sort((a, b) =>
-      STATUS_ORDER[a.project.status] - STATUS_ORDER[b.project.status] ||
-      a.project.code.localeCompare(b.project.code)
-    );
+  const projects = [...data.projects].sort((a, b) =>
+    STATUS_PRIORITY[a.status] - STATUS_PRIORITY[b.status] || a.code.localeCompare(b.code)
+  );
 
-  const latestDate = data.latest_client_notes[0]?.note_date;
+  // DEMO-ONLY: Two four-project sub-pages share one slide's rotation countdown.
+  // Using remainingMs keeps the sub-page frozen when the laptop presenter presses P.
+  const totalSubpages = Math.max(1, Math.ceil(projects.length / 4));
+  const progress = Math.max(0, Math.min(1, 1 - remainingMs / Math.max(1, rotationMs)));
+  const subpage = Math.min(totalSubpages - 1, Math.floor(progress * totalSubpages));
+  const visible = projects.slice(subpage * 4, subpage * 4 + 4);
 
   return (
     <section className="client-layout" aria-label="Catatan klien per proyek">
-      <div className="client-overview">
-        <div className="client-overview__intro">
-          <span className="client-overview__eyebrow">KOMUNIKASI PROYEK</span>
-          <strong>{data.latest_client_notes.length} catatan dari {groups.length} proyek</strong>
-        </div>
-        <span className="client-overview__latest">
-          Catatan terakhir: <strong>{latestDate ? shortDate(latestDate) : 'Belum ada'}</strong>
+      <div className="client-subpage-head">
+        <span>Catatan klien terbaru per proyek</span>
+        <span className="client-subpage-count" aria-label={`Subhalaman ${subpage + 1} dari ${totalSubpages}`}>
+          {subpage + 1}/{totalSubpages}
         </span>
       </div>
-
-      {groups.length === 0 ? (
-        <div className="client-empty">Belum ada catatan klien.</div>
+      {visible.length === 0 ? (
+        <div className="client-empty">Belum ada proyek untuk ditampilkan.</div>
       ) : (
-        <div className="client-grid">
-          {groups.map(({ project, notes }, index) => (
-            <article
-              className={`client-card client-card--${project.status}`}
-              key={project.code}
-              style={{ animationDelay: `${index * 45}ms` }}
-            >
-              <div className="client-card__head">
-                <div className="client-card__identity">
-                  <h2 title={project.name}>{project.name}</h2>
-                  <span title={project.client}>{project.code} · {project.client}</span>
-                </div>
-                <span className={`client-card__status client-card__status--${project.status}`}>
-                  {STATUS_LABELS[project.status]}
-                </span>
-              </div>
-              <div className="client-card__notes">
-                {notes.map((note, noteIndex) => (
-                  <div className="client-card__note" key={note.id}>
-                    <span className={noteIndex === 0 ? 'client-card__date recent' : 'client-card__date'}>
-                      {shortDate(note.note_date)}
-                    </span>
-                    <p title={note.body}>{note.body}</p>
+        <div className="client-grid" key={subpage}>
+          {visible.map((project, index) => {
+            const note = latestNotes.get(project.code);
+            const risks = riskItems(project.risks);
+            return (
+              <article className="client-card" key={project.code} style={{ animationDelay: `${index * 40}ms` }}>
+                <div className="client-card__head">
+                  <div className="client-card__identity">
+                    <span className="client-card__code">{project.code}</span>
+                    <h2 title={project.name}>{project.name}</h2>
+                    <div className="client-card__client">{project.client}</div>
                   </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                  <StatusPill status={project.status} isStale={project.is_stale} />
+                </div>
+
+                <div className="client-card__latest">
+                  <div className="client-card__section-head">
+                    <span>Catatan klien terbaru</span>
+                    <time dateTime={note?.note_date}>
+                      {note ? formatShortDate(note.note_date, true) : 'Belum ada tanggal'}
+                    </time>
+                  </div>
+                  <p className="client-card__note">{note?.body ?? 'Belum ada catatan klien.'}</p>
+                </div>
+
+                <div className="client-card__risk">
+                  <span className="client-card__risk-label">Kendala / risiko</span>
+                  {risks.length ? (
+                    <ul>{risks.map((risk, riskIndex) => <li key={riskIndex}>{risk}</li>)}</ul>
+                  ) : (
+                    <span className="client-card__no-risk">Tidak ada risiko tercatat.</span>
+                  )}
+                </div>
+                <p className="client-card__updated">{updatedLabel(project, now)}</p>
+              </article>
+            );
+          })}
         </div>
       )}
-      <p className="client-caption">Data simulasi untuk demonstrasi FTU Dashboard.</p>
     </section>
   );
 }

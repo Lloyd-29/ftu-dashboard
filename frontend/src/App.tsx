@@ -158,7 +158,7 @@ export default function App() {
             ) : page === 2 ? (
               <WorkloadSlide data={data} />
             ) : (
-              <ClientNotesSlide data={data} />
+              <ClientNotesSlide data={data} now={now} remainingMs={remainingMs} rotationMs={rotationMs} />
             )}
           </main>
 
