@@ -7,7 +7,11 @@ import StatusPill from './StatusPill';
 import { formatShortDate } from '../utils/date';
 import './SummarySlide.css';
 
-type Props = { data: DashboardData };
+type Props = {
+  data: DashboardData;
+  remainingMs: number;
+  rotationMs: number;
+};
 
 const PRIORITY: Record<DashboardProject['status'], number> = {
   delayed: 0,
@@ -49,12 +53,21 @@ function dateLabel(value: string | null) {
   return value ? formatShortDate(value) : 'Belum dijadwalkan';
 }
 
-export default function SummarySlide({ data }: Props) {
-  // DEMO-ONLY: Four priority rows keep the 1920x1080 reference stage readable.
+export default function SummarySlide({ data, remainingMs, rotationMs }: Props) {
+  // DEMO-ONLY: Four projects per sub-page; synchronize with the main slide timer.
+  // Pausing with P freezes both the outer slide and this inner carousel.
   const prioritized = [...data.projects].sort((a, b) =>
     PRIORITY[a.status] - PRIORITY[b.status] || a.code.localeCompare(b.code)
   );
-  const visible = prioritized.slice(0, 4);
+  const projectsPerSheet = 4;
+  const sheetCount = Math.max(1, Math.ceil(prioritized.length / projectsPerSheet));
+  const progress = Math.max(0, Math.min(1, 1 - remainingMs / Math.max(1, rotationMs)));
+  const sheetIndex = Math.min(sheetCount - 1, Math.floor(progress * sheetCount));
+  const visible = prioritized.slice(sheetIndex * projectsPerSheet, (sheetIndex + 1) * projectsPerSheet);
+  // DEMO-ONLY: Lack of engineer allocations is used as a jobdesk placeholder.
+  const assignedCodes = new Set(data.engineer_workload.flatMap((engineer) =>
+    engineer.assignments.map((assignment) => assignment.project_code)
+  ));
   const topFindings = [...data.projects].sort((a, b) =>
     b.findings_open - a.findings_open || a.code.localeCompare(b.code)
   ).slice(0, 4);
@@ -131,8 +144,13 @@ export default function SummarySlide({ data }: Props) {
       </div>
 
       <section className="ftu-card rs-projects" aria-label="Proyek aktif">
-        <h2>Proyek Aktif</h2>
-        <div className="rs-table" role="table" aria-label="Empat proyek prioritas">
+        <div className="rs-projects__heading">
+          <h2>Proyek Aktif</h2>
+          <span className="rs-projects__sheet" aria-label={`Lembar ${sheetIndex + 1} dari ${sheetCount}`}>
+            {sheetIndex + 1}/{sheetCount}
+          </span>
+        </div>
+        <div className="rs-table" role="table" aria-label={`Proyek aktif, lembar ${sheetIndex + 1} dari ${sheetCount}`}>
           <div className="rs-table__head" role="row">
             <span role="columnheader">Kode</span>
             <span role="columnheader">Proyek</span>
@@ -141,11 +159,12 @@ export default function SummarySlide({ data }: Props) {
             <span role="columnheader">Status</span>
             <span role="columnheader">Milestone berikutnya</span>
           </div>
+          {visible.length === 0 && <p className="rs-projects__empty">Belum ada proyek aktif.</p>}
           {visible.map((project, index) => (
             <div
               className="rs-table__row rs-appear"
               role="row"
-              key={project.code}
+              key={`${sheetIndex}-${project.code}`}
               style={{ animationDelay: `${index * 40}ms` } as CSSProperties}
             >
               <code role="cell">{project.code}</code>
@@ -153,10 +172,14 @@ export default function SummarySlide({ data }: Props) {
               <span role="cell" title={project.client}>{project.client}</span>
               <div role="cell" className="rs-project-progress">
                 <div className="rs-project-progress__top">
-                  <strong>{project.progress_percent === null ? 'Belum diisi' : `${project.progress_percent}%`}</strong>
+                  <strong>{project.progress_percent ?? 0}%</strong>
                   <div className="rs-project-progress__bar">
-                    <ProgressBar actual={project.progress_percent} planned={project.planned_progress_percent} showLabel={false} />
-                    <span>Rencana {project.planned_progress_percent === null ? '—' : `${project.planned_progress_percent}%`}</span>
+                    <ProgressBar actual={project.progress_percent ?? 0} planned={project.planned_progress_percent} showLabel={false} />
+                    <span>{!assignedCodes.has(project.code)
+                      ? 'Jobdesk belum dibagi'
+                      : project.planned_progress_percent === null
+                        ? 'Rencana belum diisi'
+                        : `Rencana ${project.planned_progress_percent}%`}</span>
                   </div>
                 </div>
               </div>
@@ -168,9 +191,7 @@ export default function SummarySlide({ data }: Props) {
             </div>
           ))}
         </div>
-        {data.projects.length > visible.length && (
-          <p className="rs-projects__more">+{data.projects.length - visible.length} proyek lainnya</p>
-        )}
+
       </section>
     </div>
   );

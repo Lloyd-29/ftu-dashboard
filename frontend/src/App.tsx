@@ -152,7 +152,7 @@ export default function App() {
                 {offline ? 'API belum dapat dihubungi. Periksa koneksi Laravel.' : 'Memuat data dashboard...'}
               </section>
             ) : page === 0 ? (
-              <SummarySlide data={data} />
+              <SummarySlide data={data} remainingMs={remainingMs} rotationMs={rotationMs} />
             ) : page === 1 ? (
               <ScheduleSlide data={data} />
             ) : page === 2 ? (
