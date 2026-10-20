@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import SummarySlide from './components/SummarySlide';
 import ClientNotesSlide from './components/ClientNotesSlide';
 import WorkloadSlide from './components/WorkloadSlide';
+import ScheduleSlide from './components/ScheduleSlide';
 import type { DashboardData } from './types/dashboard';
 import './App.css';
 import './components/DemoViewport.css';
@@ -203,16 +204,7 @@ function App() {
         ) : page === 2 ? (
           <WorkloadSlide data={data} />
         ) : (
-          <div className="shell-preview">
-            {/* DEMO-ONLY: Schedule slide is optional for the supervisor demo. */}
-            <section className="preview-card wide">
-              <h2>Riwayat Progres Proyek</h2>
-              <strong>{data.s_curve.length}</strong>
-            </section>
-            <p className="preview-note">
-              Konten Progres &amp; Jadwal ditambahkan pada batch berikutnya.
-            </p>
-          </div>
+          <ScheduleSlide data={data} />
         )}
       </main>
 
