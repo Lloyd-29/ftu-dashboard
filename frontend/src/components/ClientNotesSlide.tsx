@@ -38,8 +38,10 @@ export default function ClientNotesSlide({ data, now, remainingMs, rotationMs }:
   for (const note of data.latest_client_notes) {
     if (!note.project_code) continue;
     const existing = latestNotes.get(note.project_code);
-    if (!existing || note.note_date > existing.note_date ||
-      (note.note_date === existing.note_date && note.id > existing.id)) {
+    if (
+      !existing || note.note_date > existing.note_date ||
+      (note.note_date === existing.note_date && note.id > existing.id)
+    ) {
       latestNotes.set(note.project_code, note);
     }
   }
@@ -48,8 +50,8 @@ export default function ClientNotesSlide({ data, now, remainingMs, rotationMs }:
     STATUS_PRIORITY[a.status] - STATUS_PRIORITY[b.status] || a.code.localeCompare(b.code)
   );
 
-  // DEMO-ONLY: Two four-project sub-pages share one slide's rotation countdown.
-  // Using remainingMs keeps the sub-page frozen when the laptop presenter presses P.
+  // DEMO-ONLY: Keep four projects per sub-page synchronized with the outer timer.
+  // Pressing P pauses both the slideshow and this four-card sub-page rotation.
   const totalSubpages = Math.max(1, Math.ceil(projects.length / 4));
   const progress = Math.max(0, Math.min(1, 1 - remainingMs / Math.max(1, rotationMs)));
   const subpage = Math.min(totalSubpages - 1, Math.floor(progress * totalSubpages));
@@ -58,11 +60,11 @@ export default function ClientNotesSlide({ data, now, remainingMs, rotationMs }:
   return (
     <section className="client-layout" aria-label="Catatan klien per proyek">
       <div className="client-subpage-head">
-        <span>Catatan klien terbaru per proyek</span>
         <span className="client-subpage-count" aria-label={`Subhalaman ${subpage + 1} dari ${totalSubpages}`}>
           {subpage + 1}/{totalSubpages}
         </span>
       </div>
+
       {visible.length === 0 ? (
         <div className="client-empty">Belum ada proyek untuk ditampilkan.</div>
       ) : (
@@ -70,36 +72,48 @@ export default function ClientNotesSlide({ data, now, remainingMs, rotationMs }:
           {visible.map((project, index) => {
             const note = latestNotes.get(project.code);
             const risks = riskItems(project.risks);
+
             return (
-              <article className="client-card" key={project.code} style={{ animationDelay: `${index * 40}ms` }}>
-                <div className="client-card__head">
+              <article
+                className="client-card"
+                key={project.code}
+                style={{ animationDelay: `${index * 40}ms` }}
+              >
+                <header className="client-card__head">
                   <div className="client-card__identity">
                     <span className="client-card__code">{project.code}</span>
                     <h2 title={project.name}>{project.name}</h2>
-                    <div className="client-card__client">{project.client}</div>
+                    <p className="client-card__client">{project.client}</p>
                   </div>
                   <StatusPill status={project.status} isStale={project.is_stale} />
-                </div>
+                </header>
 
-                <div className="client-card__latest">
-                  <div className="client-card__section-head">
-                    <span>Catatan klien terbaru</span>
+                <section className="client-card__note-panel" aria-label="Catatan klien terbaru">
+                  <div className="client-card__panel-heading">
+                    <span>CATATAN KLIEN</span>
                     <time dateTime={note?.note_date}>
-                      {note ? formatShortDate(note.note_date, true) : 'Belum ada tanggal'}
+                      {note ? formatShortDate(note.note_date, true) : 'Tanggal belum tersedia'}
                     </time>
                   </div>
-                  <p className="client-card__note">{note?.body ?? 'Belum ada catatan klien.'}</p>
-                </div>
+                  <p className="client-card__note-text">
+                    {note?.body ?? 'Belum ada catatan klien.'}
+                  </p>
+                </section>
 
-                <div className="client-card__risk">
-                  <span className="client-card__risk-label">Kendala / risiko</span>
+                <section className="client-card__risk-panel" aria-label="Kendala atau risiko proyek">
+                  <div className="client-card__panel-heading">
+                    <span>KENDALA / RISIKO</span>
+                  </div>
                   {risks.length ? (
-                    <ul>{risks.map((risk, riskIndex) => <li key={riskIndex}>{risk}</li>)}</ul>
+                    <ul className="client-card__risk-list">
+                      {risks.map((risk, riskIndex) => <li key={riskIndex}>{risk}</li>)}
+                    </ul>
                   ) : (
-                    <span className="client-card__no-risk">Tidak ada risiko tercatat.</span>
+                    <p className="client-card__no-risk">Tidak ada risiko tercatat.</p>
                   )}
-                </div>
-                <p className="client-card__updated">{updatedLabel(project, now)}</p>
+                </section>
+
+                <p className="client-card__meta">{updatedLabel(project, now)}</p>
               </article>
             );
           })}
