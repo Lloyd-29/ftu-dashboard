@@ -1,13 +1,13 @@
 /* Shared FTU dashboard visual tokens. */
 :root {
   color-scheme: light;
-  --ftu-bg: #FFFFFF;
+  --ftu-bg: #080808; /* Change this ONE value to update the presentation background. */
   --ftu-card: #FFFFFF;
   --ftu-border: #E6E8EE;
   --ftu-ink: #14171F;
   --ftu-muted: #5B6472;
-  --ftu-indigo: #5B4BC4;
-  --ftu-tab-active: #3F3FBF;
+  --ftu-indigo: #C47A22; /* Legacy name; actual accent is copper-amber. */
+  --ftu-tab-active: #A35D13;
   --ftu-track: #E9EBF2;
   --ftu-shadow: 0 4px 18px rgba(20, 23, 31, .035);
   --ftu-radius: 12px;
@@ -28,6 +28,11 @@
   --red: #D62B1F;
   --green: #2FA36B;
   --amber: #F6B531;
+  --ftu-maroon: var(--ftu-bg); /* Compatibility alias for existing theme selectors. */
+  --ftu-amber: #E7A23A;
+  --ftu-amber-ink: #A35D13;
+  --ftu-section-divider: #C7CED9;
+  --ftu-row-divider: #D9DEE7;
   font-family: Inter, Arial, sans-serif;
   font-synthesis: none;
 }
@@ -54,3 +59,137 @@
 @keyframes ftu-bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .lite .ftu-progress__fill, .lite .ftu-stacked__segments { animation: none; }
 @media (prefers-reduced-motion: reduce) { .ftu-progress__fill, .ftu-stacked__segments { animation: none !important; } }
+
+/* -------------------------------------------------------------------------
+   Presentation appearance for the four aligned slides.
+   Unified from the former maroon-theme.css; no extra CSS import is needed.
+   ------------------------------------------------------------------------- */
+/* DEMO-ONLY: FTU presentation overrides, backed by the single token set above. */
+
+/* Header is a distinct white card over the maroon presentation canvas. */
+.dashboard-shell.dashboard-shell {
+  background: var(--ftu-maroon);
+}
+.dashboard-shell .dashboard-header {
+  background: #FFFFFF;
+  border: 1px solid var(--ftu-border);
+  border-radius: 14px;
+  padding: 0 24px;
+  box-shadow: 0 9px 25px rgba(39, 6, 5, .13);
+}
+.dashboard-shell .page-tab.active { color: var(--ftu-tab-active); }
+.dashboard-shell .page-tab.active::after { background: var(--ftu-amber); }
+
+/* Footer is outside the cards: bright text and amber indicators for contrast. */
+.dashboard-shell .dashboard-footer,
+.dashboard-shell .page-count,
+.dashboard-shell .demo-label,
+.dashboard-shell .countdown {
+  color: #FFFFFF;
+}
+.dashboard-shell .page-dot { background: rgba(255, 255, 255, .4); }
+.dashboard-shell .page-dot.active { background: var(--ftu-amber); }
+.dashboard-shell .rotation-track { background: rgba(255, 255, 255, .3); }
+.dashboard-shell .rotation-fill { background: var(--ftu-amber); }
+
+/* Reusable progress and headline accents, including hard-coded SVG colors. */
+.dashboard-shell .ftu-progress__fill,
+.dashboard-shell .rs-findings__track span { background: var(--ftu-indigo); }
+.dashboard-shell .ftu-scurve [stroke="#5B4BC4"] { stroke: var(--ftu-indigo); }
+.dashboard-shell .ftu-scurve [fill="#5B4BC4"] { fill: var(--ftu-indigo); }
+
+/* The two sub-page counters should be warm rather than purple. */
+.dashboard-shell .client-subpage-count,
+.dashboard-shell .rs-projects__sheet {
+  background: #FFF1DC;
+  color: #96520C;
+}
+
+/* No floating prose directly on maroon on the client-notes slide.
+   The project cards retain their own 'Catatan klien terbaru' headings. */
+.dashboard-shell .client-subpage-head { justify-content: flex-end; }
+.dashboard-shell .client-subpage-head > span:first-child:not(:last-child) {
+  display: none;
+}
+
+/* DEMO-ONLY: Presentation card polish (dividers use shared variables above). */
+
+/* Keep paper-white cards crisp on the maroon canvas. */
+.dashboard-shell .ftu-card,
+.dashboard-shell .client-card,
+.dashboard-shell .workload-panel,
+.dashboard-shell .ps-curve-card,
+.dashboard-shell .ps-schedule-card,
+.dashboard-shell .ps-comparison {
+  border-color: #D7DDE5;
+  box-shadow: 0 5px 16px rgba(35, 12, 12, .075);
+}
+
+/* Catatan Klien: clear divisions between project identity, note and risk. */
+.dashboard-shell .client-card__latest,
+.dashboard-shell .client-card__risk {
+  border-top: 2px solid var(--ftu-section-divider);
+}
+.dashboard-shell .client-card__updated {
+  border-top: 1px solid var(--ftu-row-divider);
+  padding-top: 10px;
+}
+.dashboard-shell .client-card__risk-label {
+  color: #344054;
+}
+
+/* Ringkasan: ruled project table and readable alert / findings groups. */
+.dashboard-shell .rs-table,
+.dashboard-shell .rs-projects {
+  border-color: #D3DAE4;
+}
+.dashboard-shell .rs-table__head {
+  background: #F3F5F8;
+  border-bottom: 2px solid var(--ftu-section-divider);
+}
+.dashboard-shell .rs-table__row {
+  border-top: 1px solid var(--ftu-row-divider);
+}
+.dashboard-shell .rs-table__row:nth-child(odd) {
+  background: #FDFDFE;
+}
+.dashboard-shell .rs-alert:not(:last-child) {
+  border-bottom: 1px solid var(--ftu-row-divider);
+}
+.dashboard-shell .rs-findings__row:not(:last-child) {
+  border-bottom: 1px solid var(--ftu-row-divider);
+  padding-bottom: 7px;
+}
+
+/* Beban Kerja: separate legend, summary totals and available engineers. */
+.dashboard-shell .workload-legend {
+  border-bottom: 1px solid var(--ftu-row-divider);
+}
+.dashboard-shell .workload-summary__stat {
+  border-bottom: 1.5px solid var(--ftu-section-divider);
+}
+.dashboard-shell .workload-available__row {
+  border-top: 1.5px solid var(--ftu-section-divider);
+}
+
+/* Progres & Jadwal: chart title, milestone rows, and comparison rows. */
+.dashboard-shell .ps-curve-card .ps-card-heading,
+.dashboard-shell .ps-comparison .ps-card-heading,
+.dashboard-shell .ps-schedule-card .ps-card-heading {
+  border-bottom: 2px solid var(--ftu-section-divider);
+  padding-bottom: 11px;
+}
+.dashboard-shell .ps-milestone {
+  border-bottom: 1px solid var(--ftu-row-divider);
+}
+.dashboard-shell .ps-comparison__row {
+  border-top: 1px solid var(--ftu-row-divider);
+}
+
+/* DEMO-ONLY: Make initial loading and API-error messages readable on dark canvas.
+   Specificity intentionally beats the base .placeholder-card rule in App.css. */
+.dashboard-shell .placeholder-card {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, .38);
+  background: rgba(255, 255, 255, .055);
+}
