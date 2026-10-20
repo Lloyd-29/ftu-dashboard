@@ -1,38 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import SummarySlide from './components/SummarySlide';
-import ClientNotesSlide from './components/ClientNotesSlide';
-import WorkloadSlide from './components/WorkloadSlide';
 import ScheduleSlide from './components/ScheduleSlide';
+import WorkloadSlide from './components/WorkloadSlide';
+import ClientNotesSlide from './components/ClientNotesSlide';
+import DashboardHeader from './components/DashboardHeader';
+import DashboardFooter from './components/DashboardFooter';
 import type { DashboardData } from './types/dashboard';
 import './App.css';
 import './components/DemoViewport.css';
 
-const PAGES = [
-  'Ringkasan',
-  'Catatan Klien',
-  'Beban Kerja',
-  'Progres & Jadwal',
-] as const;
-
-const TIME_ZONE = 'Asia/Jakarta';
+const PAGES = ['Ringkasan', 'Progres & Jadwal', 'Beban Kerja', 'Catatan Klien'] as const;
 const POLL_INTERVAL_MS = 45_000;
-
-function formatTime(value: Date | string | null): string {
-  if (!value) return '--:--';
-
-  return new Intl.DateTimeFormat('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: TIME_ZONE,
-  })
-    .format(typeof value === 'string' ? new Date(value) : value)
-    .replace('.', ':');
-}
+const STAGE_WIDTH = 1920;
+const STAGE_HEIGHT = 1080;
 
 function useDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [isOffline, setIsOffline] = useState(false);
+  const [offline, setOffline] = useState(false);
   const [lastReceivedAt, setLastReceivedAt] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -41,35 +26,25 @@ function useDashboard() {
 
     async function refresh(): Promise<void> {
       if (pending) return;
-
       const request = new AbortController();
       pending = request;
-
       const timeout = window.setTimeout(() => request.abort(), 8_000);
-
       try {
         const response = await fetch('/api/dashboard', {
-          cache: 'no-store',
-          signal: request.signal,
+          cache: 'no-store', signal: request.signal,
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload: DashboardData = await response.json();
-
         if (!payload.summary || !Array.isArray(payload.projects)) {
           throw new Error('Invalid dashboard payload');
         }
-
         if (mounted) {
           setData(payload);
           setLastReceivedAt(new Date());
-          setIsOffline(false);
+          setOffline(false);
         }
       } catch {
-        if (mounted) setIsOffline(true);
+        if (mounted) setOffline(true);
       } finally {
         window.clearTimeout(timeout);
         if (pending === request) pending = null;
@@ -77,11 +52,7 @@ function useDashboard() {
     }
 
     void refresh();
-
-    const interval = window.setInterval(() => {
-      void refresh();
-    }, POLL_INTERVAL_MS);
-
+    const interval = window.setInterval(() => { void refresh(); }, POLL_INTERVAL_MS);
     return () => {
       mounted = false;
       window.clearInterval(interval);
@@ -89,150 +60,117 @@ function useDashboard() {
     };
   }, []);
 
-  return { data, isOffline, lastReceivedAt };
+  return { data, offline, lastReceivedAt };
 }
 
-function App() {
-  const { data, isOffline, lastReceivedAt } = useDashboard();
+function readScale(): number {
+  return Math.min(window.innerWidth / STAGE_WIDTH, window.innerHeight / STAGE_HEIGHT);
+}
+
+export default function App() {
+  const { data, offline, lastReceivedAt } = useDashboard();
   const [now, setNow] = useState(() => new Date());
   const [page, setPage] = useState(0);
-
-  const rotationSeconds = Math.max(
-    5,
-    data?.settings.slide_rotation_seconds ?? 25
-  );
-
-  // DEMO-ONLY: Simple lite switch without performance detection.
-  const isLite =
-    new URLSearchParams(window.location.search).get('lite') === '1';
-
-  const isStale =
-    lastReceivedAt !== null &&
-    now.getTime() - lastReceivedAt.getTime() > 90_000;
-
-  const isDisconnected = isOffline || isStale;
+  const [paused, setPaused] = useState(false);
+  const [scale, setScale] = useState(readScale);
+  const rotationMs = Math.max(5, data?.settings.slide_rotation_seconds ?? 25) * 1_000;
+  const [remainingMs, setRemainingMs] = useState(rotationMs);
+  const remainingRef = useRef(rotationMs);
+  const isLite = new URLSearchParams(window.location.search).get('lite') === '1';
+  const disconnected = offline || (lastReceivedAt !== null && now.getTime() - lastReceivedAt.getTime() > 90_000);
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(new Date()), 1_000);
-    return () => window.clearInterval(interval);
+    const tick = window.setInterval(() => setNow(new Date()), 1_000);
+    return () => window.clearInterval(tick);
   }, []);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setPage((current) => (current + 1) % PAGES.length);
-    }, rotationSeconds * 1_000);
+    const resize = () => setScale(readScale());
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, []);
 
-    return () => window.clearInterval(interval);
-  }, [rotationSeconds]);
+  useEffect(() => {
+    remainingRef.current = rotationMs;
+    setRemainingMs(rotationMs);
+  }, [page, rotationMs]);
 
-  const currentDate = new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: TIME_ZONE,
-  }).format(now);
+  useEffect(() => {
+    if (paused) return;
+    let previous = Date.now();
+    const ticker = window.setInterval(() => {
+      const current = Date.now();
+      const delta = current - previous;
+      previous = current;
+      remainingRef.current = Math.max(0, remainingRef.current - delta);
+      setRemainingMs(remainingRef.current);
+      if (remainingRef.current === 0) {
+        setPage((currentPage) => (currentPage + 1) % PAGES.length);
+      }
+    }, 250);
+    return () => window.clearInterval(ticker);
+  }, [page, paused, rotationMs]);
+
+  // DEMO-ONLY: Keyboard-only controls for the supervisor's laptop demo.
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        setPage((current) => (current + 1) % PAGES.length);
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        setPage((current) => (current - 1 + PAGES.length) % PAGES.length);
+      } else if (event.key.toLowerCase() === 'p') {
+        event.preventDefault();
+        setPaused((current) => !current);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  const viewportStyle = { '--stage-scale': scale } as CSSProperties;
 
   return (
-    <div className={`dashboard-shell${isLite ? ' lite' : ''}`}>
-      <header className="dashboard-header">
-        <div className="brand">
-          <img className="brand-logo" src="/ftu-logo.png" alt="Logo FTU" />
-          <div className="brand-copy">
-            <strong>PT Filosofi Teknik Utama</strong>
-            <span>Dashboard Proyek Engineering</span>
-          </div>
-        </div>
+    <div className="demo-viewport" style={viewportStyle}>
+      <div className="demo-stage-holder">
+        <div className={`dashboard-shell${isLite ? ' lite' : ''}`}>
+          <DashboardHeader
+            pages={PAGES}
+            activePage={page}
+            now={now}
+            lastUpdatedAt={data?.last_updated_at ?? null}
+            hasData={data !== null}
+            disconnected={disconnected}
+            paused={paused}
+          />
 
-        <nav className="page-tabs" aria-label="Halaman slideshow">
-          {PAGES.map((label, index) => (
-            <span
-              key={label}
-              className={`page-tab${index === page ? ' active' : ''}`}
-              aria-current={index === page ? 'page' : undefined}
-            >
-              {label}
-            </span>
-          ))}
-        </nav>
+          <main key={page} className="slide-view" aria-label={PAGES[page]}>
+            {!data ? (
+              <section className="placeholder-card" role="status">
+                {offline ? 'API belum dapat dihubungi. Periksa koneksi Laravel.' : 'Memuat data dashboard...'}
+              </section>
+            ) : page === 0 ? (
+              <SummarySlide data={data} />
+            ) : page === 1 ? (
+              <ScheduleSlide data={data} />
+            ) : page === 2 ? (
+              <WorkloadSlide data={data} />
+            ) : (
+              <ClientNotesSlide data={data} />
+            )}
+          </main>
 
-        <div className="header-clock">
-          <strong>{formatTime(now)}</strong>
-          <span>{currentDate}</span>
-        </div>
-      </header>
-
-      <div className="connection-row" aria-live="polite">
-        <span className={`connection-dot${isDisconnected ? ' offline' : ''}`} />
-        <span>
-          {isDisconnected
-            ? 'Koneksi terganggu'
-            : data
-              ? 'Terhubung'
-              : 'Menghubungkan...'}
-        </span>
-        <span className="connection-separator">·</span>
-        <span>Diperbarui {formatTime(data?.last_updated_at ?? null)}</span>
-      </div>
-
-      {isDisconnected && (
-        <div className="offline-notice" role="status">
-          Menampilkan data terakhir {formatTime(lastReceivedAt)} WIB,
-          mencoba menyambung ulang.
-        </div>
-      )}
-
-      <main key={page} className="slide-view" aria-label={PAGES[page]}>
-        <div className="slide-heading">
-          <div>
-            <p className="slide-eyebrow">MONITORING PROYEK</p>
-            <h1>{PAGES[page]}</h1>
-          </div>
-          <span className="slide-date">{currentDate}</span>
-        </div>
-
-        {!data ? (
-          <section className="placeholder-card" role="status">
-            {isOffline
-              ? 'API belum dapat dihubungi. Periksa koneksi Laravel.'
-              : 'Memuat data dashboard...'}
-          </section>
-        ) : page === 0 ? (
-          <SummarySlide data={data} />
-        ) : page === 1 ? (
-          <ClientNotesSlide data={data} />
-        ) : page === 2 ? (
-          <WorkloadSlide data={data} />
-        ) : (
-          <ScheduleSlide data={data} />
-        )}
-      </main>
-
-      <footer className="dashboard-footer">
-        <div className="page-dots" aria-hidden="true">
-          {PAGES.map((label, index) => (
-            <span
-              key={label}
-              className={`page-dot${page === index ? ' active' : ''}`}
-            />
-          ))}
-        </div>
-        <span className="page-count">
-          Halaman {page + 1} dari {PAGES.length}
-        </span>
-        <div
-          className="rotation-track"
-          aria-label={`Ganti halaman setiap ${rotationSeconds} detik`}
-        >
-          <div
-            key={`${page}-${rotationSeconds}`}
-            className="rotation-fill"
-            style={{ animationDuration: `${rotationSeconds}s` }}
+          <DashboardFooter
+            page={page}
+            pageCount={PAGES.length}
+            remainingMs={remainingMs}
+            rotationMs={rotationMs}
+            paused={paused}
           />
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
-
-export default App;

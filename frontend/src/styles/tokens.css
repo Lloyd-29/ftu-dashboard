@@ -1,0 +1,56 @@
+/* Shared FTU dashboard visual tokens. */
+:root {
+  color-scheme: light;
+  --ftu-bg: #FFFFFF;
+  --ftu-card: #FFFFFF;
+  --ftu-border: #E6E8EE;
+  --ftu-ink: #14171F;
+  --ftu-muted: #5B6472;
+  --ftu-indigo: #5B4BC4;
+  --ftu-tab-active: #3F3FBF;
+  --ftu-track: #E9EBF2;
+  --ftu-shadow: 0 4px 18px rgba(20, 23, 31, .035);
+  --ftu-radius: 12px;
+  --ftu-on-bg: #BDF0D3;
+  --ftu-on-text: #14532D;
+  --ftu-risk-bg: #FCE7A3;
+  --ftu-risk-text: #7A5200;
+  --ftu-delay-bg: #FBC9C9;
+  --ftu-delay-text: #B91C1C;
+  --ftu-stale-bg: #E5E7EB;
+  --ftu-stale-text: #374151;
+  --background: var(--ftu-bg);
+  --text: var(--ftu-ink);
+  --muted: var(--ftu-muted);
+  --border: var(--ftu-border);
+  --violet: var(--ftu-indigo);
+  --grey: #8A93A3;
+  --red: #D62B1F;
+  --green: #2FA36B;
+  --amber: #F6B531;
+  font-family: Inter, Arial, sans-serif;
+  font-synthesis: none;
+}
+
+/* Reusable badges and charts, shared by the four aligned slides. */
+.ftu-pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 7px 17px; font-size: 20px; font-weight: 650; line-height: 1.25; white-space: nowrap; }
+.ftu-pill--on_track { color: var(--ftu-on-text); background: var(--ftu-on-bg); }
+.ftu-pill--at_risk { color: var(--ftu-risk-text); background: var(--ftu-risk-bg); }
+.ftu-pill--delayed { color: var(--ftu-delay-text); background: var(--ftu-delay-bg); }
+.ftu-pill--stale { color: var(--ftu-stale-text); background: var(--ftu-stale-bg); }
+.ftu-pill-group { display: inline-flex; align-items: center; gap: 8px; }
+.ftu-progress { min-width: 0; }
+.ftu-progress__track { position: relative; height: 18px; border-radius: 9px; background: var(--ftu-track); overflow: visible; }
+.ftu-progress__fill { height: 100%; border-radius: 9px; background: var(--ftu-indigo); transform-origin: left; animation: ftu-bar-grow .55s ease-out backwards; }
+.ftu-progress__planned { position: absolute; z-index: 1; top: -6px; bottom: -6px; width: 3px; transform: translateX(-50%); background: #14171F; }
+.ftu-progress__info { margin-top: 8px; color: var(--ftu-muted); font-size: 20px; }
+.ftu-progress__missing { font-size: 21px; color: var(--ftu-muted); }
+.ftu-scurve { display: block; width: 100%; height: 100%; overflow: visible; }
+.ftu-scurve text { font-family: Inter, Arial, sans-serif; font-size: 20px; fill: #516078; }
+.ftu-stacked { position: relative; height: 24px; background: var(--ftu-track); border-radius: 7px; }
+.ftu-stacked__segments { display: flex; height: 100%; overflow: hidden; border-radius: 7px; animation: ftu-bar-grow .55s ease-out backwards; transform-origin: left; }
+.ftu-stacked__part { display: block; height: 100%; }
+.ftu-stacked__capacity { position: absolute; left: 83.3333%; top: -9px; bottom: -9px; border-left: 2px dashed #344054; }
+@keyframes ftu-bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.lite .ftu-progress__fill, .lite .ftu-stacked__segments { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ftu-progress__fill, .ftu-stacked__segments { animation: none !important; } }
