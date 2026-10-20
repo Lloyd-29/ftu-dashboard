@@ -22,6 +22,12 @@ export default function SCurveChart({ points }: { points: Point[] }) {
   const gap = latest !== null && latest.planned !== null && latest.actual !== null
     ? latest.planned - latest.actual : null;
   const pointX = latestActualIndex >= 0 ? xAt(latestActualIndex, sorted.length) : 0;
+  // DEMO-ONLY: Keep the red gap callout within the SVG even when the latest point is at the right edge.
+  const labelOnLeft = pointX > 735;
+  const textX = labelOnLeft ? pointX - 15 : pointX + 15;
+  const textAnchor = labelOnLeft ? 'end' : 'start';
+  const calloutX = labelOnLeft ? pointX - 192 : pointX + 22;
+  const arrowX = labelOnLeft ? pointX - 10 : pointX + 10;
 
   return (
     <svg className="ftu-scurve" viewBox="0 0 1010 430" role="img" aria-label={`Kurva S progres rencana dan aktual, ${sorted.length} minggu`}>
@@ -49,13 +55,13 @@ export default function SCurveChart({ points }: { points: Point[] }) {
         <g>
           <line x1={pointX} x2={pointX} y1="74" y2="354" stroke="#5B4BC4" strokeWidth="2" strokeDasharray="7 7" />
           <text x={pointX} y="56" textAnchor="middle" fill="#5B4BC4">Hari ini</text>
-          {latest.planned !== null && <text x={pointX + 13} y={yAt(latest.planned) - 14} fontWeight="750">{latest.planned}%</text>}
-          {latest.actual !== null && <text x={pointX + 13} y={yAt(latest.actual) + 31} fontWeight="750">{latest.actual}%</text>}
+          {latest.planned !== null && <text x={textX} y={yAt(latest.planned) - 14} textAnchor={textAnchor} fontWeight="750">{latest.planned}%</text>}
+          {latest.actual !== null && <text x={textX} y={yAt(latest.actual) + 31} textAnchor={textAnchor} fontWeight="750">{latest.actual}%</text>}
           {gap !== null && gap > 0 && latest.actual !== null && latest.planned !== null && (
             <g>
-              <line x1={pointX + 10} x2={pointX + 10} y1={yAt(latest.planned) + 5} y2={yAt(latest.actual) - 5} stroke="#D62B1F" strokeWidth="2" />
-              <rect x={pointX + 22} y={(yAt(latest.planned) + yAt(latest.actual)) / 2 - 19} width="172" height="36" rx="7" fill="#FFF2F2" stroke="#D62B1F" />
-              <text x={pointX + 108} y={(yAt(latest.planned) + yAt(latest.actual)) / 2 + 6} textAnchor="middle" fill="#B91C1C" fontWeight="650">Terlambat {gap}%</text>
+              <line x1={arrowX} x2={arrowX} y1={yAt(latest.planned) + 5} y2={yAt(latest.actual) - 5} stroke="#D62B1F" strokeWidth="2" />
+              <rect x={calloutX} y={(yAt(latest.planned) + yAt(latest.actual)) / 2 - 19} width="172" height="36" rx="7" fill="#FFF2F2" stroke="#D62B1F" />
+              <text x={calloutX + 86} y={(yAt(latest.planned) + yAt(latest.actual)) / 2 + 6} textAnchor="middle" fill="#B91C1C" fontWeight="650">Terlambat {gap}%</text>
             </g>
           )}
         </g>
