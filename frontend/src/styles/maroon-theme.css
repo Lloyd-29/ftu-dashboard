@@ -1,0 +1,59 @@
+/* DEMO-ONLY: FTU maroon/amber presentation palette.
+   Keep all changes in this override so the original logo, slide data,
+   animation, rotation and polling stay untouched. */
+:root {
+  /* Darker, maroon-toned companion to the red in the original FTU logo. */
+  --ftu-maroon: #8B1E18;
+  --ftu-amber: #E7A23A;
+  --ftu-amber-ink: #A35D13;
+  --ftu-bg: var(--ftu-maroon);
+  --ftu-indigo: #C47A22; /* Legacy variable name; new copper-amber accent. */
+  --ftu-tab-active: var(--ftu-amber-ink);
+  --violet: var(--ftu-indigo); /* Legacy alias used in older slide CSS. */
+}
+
+/* Header is a distinct white card over the maroon presentation canvas. */
+.dashboard-shell.dashboard-shell {
+  background: var(--ftu-maroon);
+}
+.dashboard-shell .dashboard-header {
+  background: #FFFFFF;
+  border: 1px solid var(--ftu-border);
+  border-radius: 14px;
+  padding: 0 24px;
+  box-shadow: 0 9px 25px rgba(39, 6, 5, .13);
+}
+.dashboard-shell .page-tab.active { color: var(--ftu-tab-active); }
+.dashboard-shell .page-tab.active::after { background: var(--ftu-amber); }
+
+/* Footer is outside the cards: bright text and amber indicators for contrast. */
+.dashboard-shell .dashboard-footer,
+.dashboard-shell .page-count,
+.dashboard-shell .demo-label,
+.dashboard-shell .countdown {
+  color: #FFFFFF;
+}
+.dashboard-shell .page-dot { background: rgba(255, 255, 255, .4); }
+.dashboard-shell .page-dot.active { background: var(--ftu-amber); }
+.dashboard-shell .rotation-track { background: rgba(255, 255, 255, .3); }
+.dashboard-shell .rotation-fill { background: var(--ftu-amber); }
+
+/* Reusable progress and headline accents, including hard-coded SVG colors. */
+.dashboard-shell .ftu-progress__fill,
+.dashboard-shell .rs-findings__track span { background: var(--ftu-indigo); }
+.dashboard-shell .ftu-scurve [stroke="#5B4BC4"] { stroke: var(--ftu-indigo); }
+.dashboard-shell .ftu-scurve [fill="#5B4BC4"] { fill: var(--ftu-indigo); }
+
+/* The two sub-page counters should be warm rather than purple. */
+.dashboard-shell .client-subpage-count,
+.dashboard-shell .rs-projects__sheet {
+  background: #FFF1DC;
+  color: #96520C;
+}
+
+/* No floating prose directly on maroon on the client-notes slide.
+   The project cards retain their own 'Catatan klien terbaru' headings. */
+.dashboard-shell .client-subpage-head { justify-content: flex-end; }
+.dashboard-shell .client-subpage-head > span:first-child:not(:last-child) {
+  display: none;
+}
