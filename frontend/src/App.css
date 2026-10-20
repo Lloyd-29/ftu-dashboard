@@ -25,6 +25,21 @@ body { min-width: 0; overflow: hidden; background: var(--ftu-bg); color: var(--f
 .brand { display: flex; align-items: center; gap: 18px; white-space: nowrap; }
 .brand-logo { height: 76px; width: 76px; object-fit: contain; }
 .brand-name { font-size: 22px; font-weight: 750; color: var(--ftu-ink); letter-spacing: -.015em; }
+/* FTU wordmark: stacked lettering based on the supervisor's visual reference. */
+.brand-name--stacked {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding-left: 14px;
+  border-left: 4px solid var(--ftu-ink);
+  color: var(--ftu-ink);
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  line-height: 1.06;
+  white-space: nowrap;
+}
 .page-tabs { display: flex; gap: 37px; height: 100%; align-items: center; justify-content: center; }
 .page-tab { position: relative; display: inline-flex; align-items: center; height: 100%; font-size: 22px; font-weight: 600; white-space: nowrap; color: #49536B; cursor: default; user-select: none; }
 .page-tab.active { color: var(--ftu-tab-active); }

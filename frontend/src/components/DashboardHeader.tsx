@@ -21,7 +21,11 @@ export default function DashboardHeader({
     <header className="dashboard-header">
       <div className="brand">
         <img className="brand-logo" src="/ftu-logo.png" alt="Logo FTU" />
-        <strong className="brand-name">PT Filosofi Teknik Utama</strong>
+        <strong className="brand-name brand-name--stacked" aria-label="Filosofi Teknik Utama">
+          <span>FILOSOFI</span>
+          <span>TEKNIK</span>
+          <span>UTAMA</span>
+        </strong>
       </div>
 
       <nav className="page-tabs" aria-label="Urutan slide, bukan navigasi interaktif">
