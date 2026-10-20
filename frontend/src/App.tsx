@@ -154,7 +154,7 @@ export default function App() {
             ) : page === 0 ? (
               <SummarySlide data={data} remainingMs={remainingMs} rotationMs={rotationMs} />
             ) : page === 1 ? (
-              <ScheduleSlide data={data} />
+              <ScheduleSlide data={data} remainingMs={remainingMs} rotationMs={rotationMs} />
             ) : page === 2 ? (
               <WorkloadSlide data={data} />
             ) : (
