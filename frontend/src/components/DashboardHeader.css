@@ -1,0 +1,52 @@
+/* DEMO-ONLY: Compact, right-aligned WIB metadata inside the existing 120px header. */
+.dashboard-shell .header-clock {
+  gap: 1px;
+  min-width: 0;
+}
+
+.dashboard-shell .header-clock__time {
+  font-size: 44px;
+}
+
+.dashboard-shell .header-clock__date {
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.dashboard-shell .header-data-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  gap: 2px;
+  font-size: 16px;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.dashboard-shell .header-data-status__updated {
+  display: block;
+  color: var(--ftu-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dashboard-shell .header-data-status__connection {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dashboard-shell .header-data-status__connection .connection-dot {
+  flex: 0 0 11px;
+  margin-left: 0;
+}
+
+.dashboard-shell .header-data-status__connection .paused-flag {
+  margin-left: 4px;
+}

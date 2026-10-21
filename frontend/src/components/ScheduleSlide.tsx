@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { DashboardData, DashboardProject } from '../types/dashboard';
 import SCurveChart from './SCurveChart';
 import ProgressBar from './ProgressBar';
@@ -10,6 +11,7 @@ type Props = {
   data: DashboardData;
   remainingMs: number;
   rotationMs: number;
+  paused: boolean;
 };
 type Curve = DashboardData['s_curve'][number];
 type Milestone = DashboardData['upcoming_milestones'][number];
@@ -31,30 +33,61 @@ function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
 
-/** DEMO-ONLY: Slowly reveal a long list during the existing 25-second slide.
- * Scrolling with a mouse/touchpad (or touching/dragging) stops auto-scroll
- * until this slide is entered again. The actual native overflow remains enabled.
+/** DEMO-ONLY: Native, mouse-scrollable lists animated at browser frame rate.
+ * The slideshow timer remains the source of truth. Manual input takes control
+ * for the remainder of this slide; P freezes and resumes the exact position.
  */
-function useSlideAutoScroll(remainingMs: number, rotationMs: number) {
+function useSlideAutoScroll(remainingMs: number, rotationMs: number, paused: boolean) {
   const ref = useRef<HTMLDivElement>(null);
   const userIsScrolling = useRef(false);
+  const clock = useRef({ remainingMs, sampledAt: performance.now(), paused });
+
+  // React's slide countdown updates every 250ms. Capture each sample, then
+  // interpolate its position every animation frame instead of scrolling in jumps.
+  useLayoutEffect(() => {
+    clock.current = { remainingMs, sampledAt: performance.now(), paused };
+  }, [remainingMs, paused]);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element || userIsScrolling.current) return;
+    if (!element) return;
     if (new URLSearchParams(window.location.search).get('lite') === '1') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
-    // Briefly show the first rows, glide down, then hold on the final rows.
-    const progress = clamp01(1 - remainingMs / Math.max(1, rotationMs));
-    const travel = clamp01((progress - 0.08) / 0.84);
-    const eased = travel * travel * (3 - 2 * travel);
-    element.scrollTop = maxScroll * eased;
-  }, [remainingMs, rotationMs]);
+    let frame = 0;
+    const animate = (time: number) => {
+      if (userIsScrolling.current) return;
+      const sample = clock.current;
+      const elapsed = sample.paused ? 0 : Math.max(0, time - sample.sampledAt);
+      const currentRemaining = Math.max(0, sample.remainingMs - elapsed);
+      const progress = clamp01(1 - currentRemaining / Math.max(1, rotationMs));
+      const travel = clamp01((progress - 0.12) / 0.22);
+      const eased = travel;
+      const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
+      const destination = maxScroll * eased;
+      if (Math.abs(element.scrollTop - destination) > 0.05) {
+        element.scrollTop = destination;
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [rotationMs]);
 
   const stop = () => { userIsScrolling.current = true; };
-  return { ref, onWheelCapture: stop, onTouchStartCapture: stop, onPointerDownCapture: stop };
+  const stopForScrollKey = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
+      stop();
+    }
+  };
+  return {
+    ref,
+    onWheelCapture: stop,
+    onTouchStartCapture: stop,
+    onPointerDownCapture: stop,
+    onKeyDownCapture: stopForScrollKey,
+  };
 }
 
 function MilestoneRow({ item, overdue, project }: {
@@ -80,7 +113,7 @@ function MilestoneRow({ item, overdue, project }: {
   );
 }
 
-export default function ScheduleSlide({ data, remainingMs, rotationMs }: Props) {
+export default function ScheduleSlide({ data, remainingMs, rotationMs, paused }: Props) {
   const projectByCode = new Map(data.projects.map((project) => [project.code, project]));
   const curveByCode = new Map(data.s_curve.map((curve) => [curve.project_code, curve]));
 
@@ -102,8 +135,8 @@ export default function ScheduleSlide({ data, remainingMs, rotationMs }: Props) 
   const weeks = featuredCurve?.points.length ?? 0;
   const hasAnyActual = featuredCurve?.points.some((point) => point.actual !== null) ?? false;
 
-  const milestoneScroll = useSlideAutoScroll(remainingMs, rotationMs);
-  const comparisonScroll = useSlideAutoScroll(remainingMs, rotationMs);
+  const milestoneScroll = useSlideAutoScroll(remainingMs, rotationMs, paused);
+  const comparisonScroll = useSlideAutoScroll(remainingMs, rotationMs, paused);
   const milestones = [
     ...data.overdue_milestones.map((item) => ({ item, overdue: true })),
     ...data.upcoming_milestones.map((item) => ({ item, overdue: false })),

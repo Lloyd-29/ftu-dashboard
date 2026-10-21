@@ -107,7 +107,25 @@
 .workload-summary__stat h3 { margin: 0 0 8px; color: var(--ftu-ink); font-size: 26px; line-height: 1.1; }
 .workload-summary__stat p { margin: 0; color: var(--ftu-muted); font-size: 20px; line-height: 1.25; }
 .workload-summary__warning { color: var(--ftu-delay-text); margin: 13px 0 0; font-size: 19px; font-weight: 650; }
-.workload-available__description { margin: 8px 0 8px; color: var(--ftu-muted); font-size: 19px; }
+.workload-available { display: flex; flex-direction: column; }
+.workload-available h2 { flex: 0 0 auto; }
+.workload-available__description { margin: 8px 0 8px; color: var(--ftu-muted); font-size: 19px; flex: 0 0 auto; }
+/* DEMO-ONLY: Only the available-engineer rows scroll; the card heading stays fixed. */
+.workload-available__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #A6A7CD #F0F0F6;
+}
+.workload-available__list::-webkit-scrollbar { width: 9px; }
+.workload-available__list::-webkit-scrollbar-track { background: #F0F0F6; border-radius: 10px; }
+.workload-available__list::-webkit-scrollbar-thumb { background: #A6A7CD; border-radius: 10px; }
+.workload-available__list:focus-visible { outline: 2px solid var(--ftu-indigo); outline-offset: -2px; }
 .workload-available__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--ftu-border); padding: 15px 0; }
 .workload-available__info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .workload-available__info strong { font-size: 23px; color: var(--ftu-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

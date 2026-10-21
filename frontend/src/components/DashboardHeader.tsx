@@ -1,4 +1,5 @@
 import { formatClock, formatDateTimeWib, formatLongDate } from '../utils/date';
+import './DashboardHeader.css';
 
 type Props = {
   pages: readonly string[];
@@ -45,12 +46,20 @@ export default function DashboardHeader({
           {formatClock(now)}<span className="header-clock__zone">WIB</span>
         </div>
         <span className="header-clock__date">{formatLongDate(now)}</span>
+
+        {/* DEMO-ONLY: Two right-aligned status rows prevent long offline text from crossing the page tabs. */}
         <div className="header-data-status" aria-live="polite">
-          <span>Diperbarui {formatDateTimeWib(lastUpdatedAt)}</span>
-          <span aria-hidden="true">·</span>
-          <span className={`connection-dot${disconnected ? ' offline' : !hasData ? ' waiting' : ''}`} aria-hidden="true" />
-          <span className={disconnected ? 'connection-text offline' : ''}>{status}</span>
-          {paused && <span className="paused-flag">Dijeda</span>}
+          <span className="header-data-status__updated">
+            Diperbarui {formatDateTimeWib(lastUpdatedAt)}
+          </span>
+          <span className="header-data-status__connection">
+            <span
+              className={`connection-dot${disconnected ? ' offline' : !hasData ? ' waiting' : ''}`}
+              aria-hidden="true"
+            />
+            <span className={disconnected ? 'connection-text offline' : ''}>{status}</span>
+            {paused && <span className="paused-flag">Dijeda</span>}
+          </span>
         </div>
       </div>
     </header>

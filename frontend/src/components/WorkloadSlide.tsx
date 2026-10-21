@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DashboardData } from '../types/dashboard';
 import StackedBar, { projectColor } from './StackedBar';
 import './WorkloadSlide.css';
@@ -34,6 +34,65 @@ function useCountUp(): number {
   }, []);
 
   return progress;
+}
+
+function AvailableEngineers({ engineers }: { engineers: Engineer[] }) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [manualScroll, setManualScroll] = useState(false);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || manualScroll) return;
+    const lite = new URLSearchParams(window.location.search).get('lite') === '1';
+    if (lite || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // DEMO-ONLY: Automatically reveal clipped entries during the 25-second TV slide.
+    // Manual scrolling takes over immediately when the viewer interacts with the list.
+    let frame = 0;
+    let startedAt: number | null = null;
+    const ease = (value: number) => value * value * (3 - 2 * value);
+    const animate = (now: number) => {
+      if (startedAt === null) startedAt = now;
+      const distance = Math.max(0, list.scrollHeight - list.clientHeight);
+      if (distance > 1) {
+        const phase = (now - startedAt) % 16_000;
+        let fraction = 0;
+        if (phase < 2_000) fraction = 0;
+        else if (phase < 7_300) fraction = ease((phase - 2_000) / 5_300);
+        else if (phase < 11_300) fraction = 1;
+        else if (phase < 15_300) fraction = 1 - ease((phase - 11_300) / 4_000);
+        list.scrollTop = distance * fraction;
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [manualScroll]);
+
+  return (
+    <div
+      ref={listRef}
+      className="workload-available__list"
+      aria-label="Daftar engineer dengan kapasitas tersisa, dapat digulir"
+      tabIndex={0}
+      onWheel={() => setManualScroll(true)}
+      onPointerDown={() => setManualScroll(true)}
+      onTouchStart={() => setManualScroll(true)}
+    >
+      {engineers.map((engineer) => (
+        <div className="workload-available__row" key={engineer.name}>
+          <div className="workload-available__info">
+            <strong>{engineer.name}</strong>
+            <span>Proyek: {engineer.assignments.length
+              ? engineer.assignments.map((assignment) => assignment.project_code).join(', ')
+              : 'Tidak ada penugasan'}</span>
+          </div>
+          <span className="workload-available__remaining">sisa <strong>{100 - engineer.total_allocation_percent}%</strong></span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function WorkloadSlide({ data }: Props) {
@@ -126,17 +185,9 @@ export default function WorkloadSlide({ data }: Props) {
           <p className="workload-available__description">Engineer dengan sisa kapasitas terbesar</p>
           {mostAvailable.length === 0 ? (
             <p className="workload-available__empty">Belum ada engineer dengan kapasitas tersisa.</p>
-          ) : mostAvailable.map((engineer) => (
-            <div className="workload-available__row" key={engineer.name}>
-              <div className="workload-available__info">
-                <strong>{engineer.name}</strong>
-                <span>Proyek: {engineer.assignments.length
-                  ? engineer.assignments.map((assignment) => assignment.project_code).join(', ')
-                  : 'Tidak ada penugasan'}</span>
-              </div>
-              <span className="workload-available__remaining">sisa <strong>{100 - engineer.total_allocation_percent}%</strong></span>
-            </div>
-          ))}
+          ) : (
+            <AvailableEngineers engineers={mostAvailable} />
+          )}
         </section>
       </aside>
     </section>

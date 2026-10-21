@@ -21,6 +21,11 @@ class DatabaseSeeder extends Seeder
             SettingSeeder::class,
             ProjectSeeder::class,
             ProjectEngineerSeeder::class,
+            ProjectNoteSeeder::class,
+            MilestoneSeeder::class,
+            ProgressPointSeeder::class,
+            AlertSeeder::class,
+            ActivityLogSeeder::class,
         ]);
     }
 }
