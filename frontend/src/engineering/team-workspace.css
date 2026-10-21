@@ -1,0 +1,45 @@
+/* M2 task and field-verification screens, isolated from the TV slideshow. */
+.ftu-team-workspace { display: flex; flex-direction: column; gap: 20px; }
+.ftu-team-workspace .ftu-heading { margin-bottom: 0; }
+.ftu-team-section > h2, .ftu-verification-list > h2, .ftu-team-title h2 { font-size: 18px; margin: 0 0 16px; }
+.ftu-team-section .ftu-stack > button[type=submit], .ftu-visit-form > button[type=submit] { align-self: flex-start; }
+.ftu-team-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; }
+.ftu-team-span { grid-column: 1/-1; }
+.ftu-team-fields label, .ftu-team-filters label { display: flex; flex-direction: column; gap: 7px; color: #344054; font-weight: 650; font-size: 13px; }
+.ftu-team-fields input, .ftu-team-fields textarea, .ftu-team-fields select, .ftu-team-filters select, .ftu-team-table select { width: 100%; min-height: 42px; border: 1px solid #CCD3DF; border-radius: 8px; background: #FFF; color: #14171F; padding: 9px 10px; font: inherit; font-size: 14px; }
+.ftu-team-fields textarea { resize: vertical; }
+.ftu-team-fields input:focus, .ftu-team-fields select:focus, .ftu-team-fields textarea:focus, .ftu-team-filters select:focus { outline: 2px solid #5B4BC4; outline-offset: 1px; }
+.ftu-team-fields option:disabled { color: #8A93A3; }
+.ftu-team-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin: 0 0 18px; }
+.ftu-team-filters label { min-width: 170px; flex: 1; }
+.ftu-team-filters button { flex-shrink: 0; }
+.ftu-team-filters .ftu-secondary, .ftu-team-filter-button { min-height: 42px; padding: 9px 17px; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.ftu-team-filters .ftu-secondary { border: 1px solid #B8ADFA; color: #5B4BC4; background: #FFF; }
+.ftu-team-filter-button { border: 1px solid #5B4BC4; background: #5B4BC4; color: #FFF; }
+.ftu-team-filter-panel { margin: 0; }
+.ftu-team-title { display: flex; justify-content: space-between; align-items: baseline; }
+.ftu-team-title span, .ftu-helper { color: #5B6472; font-size: 12px; line-height: 1.5; }
+.ftu-table-scroll { overflow-x: auto; width: 100%; }
+.ftu-team-table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 13px; text-align: left; }
+.ftu-team-table th { padding: 13px 10px; background: #F5F6F9; color: #5B6472; font-size: 12px; border-bottom: 1px solid #E6E8EE; }
+.ftu-team-table td { padding: 13px 10px; border-bottom: 1px solid #E6E8EE; vertical-align: top; }
+.ftu-team-table td strong { color: #5B4BC4; }
+.ftu-team-table td div { margin-top: 5px; }
+.ftu-team-table td small { font-size: 11px; color: #5B6472; white-space: pre-wrap; }
+.ftu-team-table select { max-width: 165px; }
+.ftu-verification-grid { display: grid; grid-template-columns: 310px minmax(0,1fr); align-items: start; gap: 20px; }
+.ftu-verification-list { display: flex; flex-direction: column; gap: 9px; }
+.ftu-visit-item { padding: 14px; border: 1px solid #E6E8EE; border-radius: 9px; text-align: left; background: #FFF; display: flex; flex-direction: column; gap: 7px; color: #14171F; }
+.ftu-visit-item.selected { border-color: #B8ADFA; background: #F3F1FF; }
+.ftu-visit-item strong { color: #5B4BC4; font-size: 12px; }
+.ftu-visit-item span { font-size: 14px; }
+.ftu-visit-item small { font-size: 12px; color: #5B6472; }
+.ftu-visit-detail .ftu-detail-title { margin-bottom: 20px; }
+.ftu-visit-detail .ftu-detail-title h2 { overflow-wrap: anywhere; }
+.ftu-visit-detail .ftu-mini-pill { color: #5B4BC4; background: #F0EEFF; }
+.ftu-visit-form, .ftu-visit-report { border-top: 1px solid #E6E8EE; padding-top: 20px; margin-top: 20px; }
+.ftu-visit-form h3, .ftu-visit-report h3 { font-size: 16px; margin: 0 0 12px; }
+.ftu-visit-report p { font-size: 13px; white-space: pre-wrap; line-height: 1.65; }
+.ftu-review-note { background: #FFF2CC; color: #665000; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.55; }
+@media(max-width:950px) { .ftu-team-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .ftu-verification-grid { grid-template-columns: 1fr; } }
+@media(max-width:620px) { .ftu-team-fields { grid-template-columns: 1fr; } }

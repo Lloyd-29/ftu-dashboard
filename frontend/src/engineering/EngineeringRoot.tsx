@@ -2,7 +2,10 @@ import { useEffect, useState, type FormEvent } from 'react';
 import App from '../App';
 import { api, csrf, type User } from './api';
 import ProjectWorkspace from './ProjectWorkspace';
+import TaskWorkspace from './TaskWorkspace';
+import FieldVerificationWorkspace from './FieldVerificationWorkspace';
 import './engineering.css';
+import './team-workspace.css';
 
 type Path = 'dashboard'|'proyek'|'tugas'|'verifikasi'|'dokumen';
 function currentPath():Path {
@@ -87,7 +90,7 @@ export default function EngineeringRoot() {
       <div className="ftu-account"><span>{user.name} · {user.role}</span><button type="button" className="ftu-subtle" onClick={logout}>Keluar</button></div>
     </header>
     <nav className="ftu-nav" aria-label="Menu utama">{nav.map(item=><button key={item} type="button" onClick={()=>navigate(item)} className={visible===item?'active':''}>{labels[item]}</button>)}</nav>
-    {visible==='dashboard'? <App/> : visible==='proyek'? <ProjectWorkspace canEdit={canEdit}/>:
+    {visible==='dashboard'? <App/> : visible==='proyek'? <ProjectWorkspace canEdit={canEdit}/>: visible==='tugas'? <TaskWorkspace canManage={canEdit}/>: visible==='verifikasi'? <FieldVerificationWorkspace canManage={canEdit}/>:
       <main className="ftu-content"><section className="ftu-panel"><h1>{labels[visible]}</h1><p>Modul ini tersedia pada milestone berikutnya. Data proyek dan dashboard tetap bisa digunakan.</p></section></main>}
   </div>;
 }
