@@ -17,18 +17,13 @@ final class DashboardController extends Controller
 {
     public function __invoke(): JsonResponse
     {
-        // DEMO-ONLY: Open access is restricted to the local environment.
-        if (! app()->environment('local')) {
-            abort(404);
-        }
-
+        // Protected by auth:sanctum and view-dashboard authorization in routes/api.php.
         $now = now();
         $today = $now->copy()->startOfDay();
         $endDate = $today->copy()->addDays(14);
 
         $rotationSeconds = max(5, (int) (Setting::query()
             ->where('key', 'slide_rotation_seconds')->value('value') ?? 25));
-
         $staleDays = max(1, (int) (Setting::query()
             ->where('key', 'stale_after_days')->value('value') ?? 7));
 
@@ -40,7 +35,6 @@ final class DashboardController extends Controller
             ])
             ->orderBy('code')
             ->get();
-
         $projectIds = $projects->pluck('id');
 
         $alerts = Alert::query()
@@ -49,9 +43,7 @@ final class DashboardController extends Controller
             ->where(fn ($query) => $query
                 ->whereNull('project_id')
                 ->orWhereIn('project_id', $projectIds))
-            ->orderByRaw(
-                "CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END"
-            )
+            ->orderByRaw("CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END")
             ->orderBy('due_date')
             ->get();
 
@@ -89,18 +81,11 @@ final class DashboardController extends Controller
 
         $workload = Engineer::query()
             ->where('is_active', true)
-            ->with([
-                'projects' => fn ($query) =>
-                    $query->where('projects.is_active', true),
-            ])
+            ->with(['projects' => fn ($query) => $query->where('projects.is_active', true)])
             ->orderBy('name')
             ->get()
             ->map(function (Engineer $engineer): array {
-                $total = (int) $engineer->projects->sum(
-                    fn (Project $project): int =>
-                        (int) $project->pivot->allocation_percent
-                );
-
+                $total = (int) $engineer->projects->sum(fn (Project $project): int => (int) $project->pivot->allocation_percent);
                 return [
                     'name' => $engineer->name,
                     'total_allocation_percent' => $total,
@@ -109,11 +94,8 @@ final class DashboardController extends Controller
                         ->map(fn (Project $project): array => [
                             'project_code' => $project->code,
                             'project_name' => $project->name,
-                            'allocation_percent' =>
-                                (int) $project->pivot->allocation_percent,
-                        ])
-                        ->values()
-                        ->all(),
+                            'allocation_percent' => (int) $project->pivot->allocation_percent,
+                        ])->values()->all(),
                 ];
             });
 
@@ -129,83 +111,57 @@ final class DashboardController extends Controller
 
         return response()->json([
             'generated_at' => $now->toIso8601String(),
-            'last_updated_at' => $latestChange
-                ? Carbon::parse($latestChange)->toIso8601String()
-                : null,
-
+            'last_updated_at' => $latestChange ? Carbon::parse($latestChange)->toIso8601String() : null,
             'settings' => [
                 'slide_rotation_seconds' => $rotationSeconds,
                 'stale_after_days' => $staleDays,
             ],
-
             'summary' => [
                 'total_projects' => $projects->count(),
                 'on_track' => $projects->where('status', 'on_track')->count(),
                 'at_risk' => $projects->where('status', 'at_risk')->count(),
                 'delayed' => $projects->where('status', 'delayed')->count(),
-                'without_progress' =>
-                    $projects->whereNull('progress_percent')->count(),
+                'without_progress' => $projects->whereNull('progress_percent')->count(),
                 'findings_open' => $projects->sum('findings_open'),
                 'findings_closed' => $projects->sum('findings_closed'),
                 'active_alerts' => $alerts->count(),
             ],
-
             'projects' => $projects->map(fn (Project $project): array => [
                 'code' => $project->code,
                 'name' => $project->name,
                 'client' => $project->client,
                 'status' => $project->status,
                 'progress_percent' => $project->progress_percent,
-                'planned_progress_percent' =>
-                    $project->planned_progress_percent,
+                'planned_progress_percent' => $project->planned_progress_percent,
                 'sop_phase' => $project->sop_phase,
                 'next_milestone_name' => $project->next_milestone_name,
-                'next_milestone_date' =>
-                    $project->next_milestone_date?->toDateString(),
+                'next_milestone_date' => $project->next_milestone_date?->toDateString(),
                 'risks' => $project->risks,
                 'findings_open' => $project->findings_open,
                 'findings_closed' => $project->findings_closed,
                 'updated_at' => $project->updated_at?->toIso8601String(),
                 'updated_by_name' => $project->updatedBy?->name,
-                'is_stale' => $project->updated_at === null
-                    || $project->updated_at->lt(
-                        $now->copy()->subDays($staleDays)
-                    ),
+                'is_stale' => $project->updated_at === null || $project->updated_at->lt($now->copy()->subDays($staleDays)),
             ])->values()->all(),
-
             'alerts' => $alerts->map(fn (Alert $alert): array => [
                 'id' => $alert->id,
                 'title' => $alert->title,
                 'severity' => $alert->severity,
                 'project_code' => $alert->project?->code,
                 'due_date' => $alert->due_date?->toDateString(),
-                'is_overdue' =>
-                    $alert->due_date?->lt($today) ?? false,
+                'is_overdue' => $alert->due_date?->lt($today) ?? false,
             ])->values()->all(),
-
-            'upcoming_milestones' => $milestones
-                ->filter(fn (array $item): bool => ! $item['is_overdue'])
-                ->values()
-                ->all(),
-
-            'overdue_milestones' => $milestones
-                ->filter(fn (array $item): bool => $item['is_overdue'])
-                ->values()
-                ->all(),
-
+            'upcoming_milestones' => $milestones->filter(fn (array $item): bool => ! $item['is_overdue'])->values()->all(),
+            'overdue_milestones' => $milestones->filter(fn (array $item): bool => $item['is_overdue'])->values()->all(),
             's_curve' => $projects->map(fn (Project $project): array => [
                 'project_code' => $project->code,
                 'project_name' => $project->name,
-                'points' => $project->progressPoints
-                    ->map(fn (ProgressPoint $point): array => [
-                        'week_date' => $point->week_date->toDateString(),
-                        'planned' => $point->planned,
-                        'actual' => $point->actual,
-                    ])
-                    ->values()
-                    ->all(),
+                'points' => $project->progressPoints->map(fn (ProgressPoint $point): array => [
+                    'week_date' => $point->week_date->toDateString(),
+                    'planned' => $point->planned,
+                    'actual' => $point->actual,
+                ])->values()->all(),
             ])->values()->all(),
-
             'engineer_workload' => $workload->values()->all(),
             'latest_client_notes' => $notes->values()->all(),
         ])->header('Cache-Control', 'no-store');

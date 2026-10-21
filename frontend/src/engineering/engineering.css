@@ -1,0 +1,70 @@
+/* Separate light input workbench. TV slideshow CSS is unchanged. */
+body:has(.engineering-root) { overflow: auto; background: #F7F8FB; }
+.engineering-root { color: #14171F; min-height: 100vh; background: #F7F8FB; font-family: Inter, Arial, sans-serif; }
+.engineering-root * { box-sizing: border-box; }
+.engineering-root button, .engineering-root input, .engineering-root textarea, .engineering-root select { font: inherit; }
+.engineering-root button { cursor: pointer; }
+.engineering-root button:disabled, .engineering-root fieldset:disabled { cursor: not-allowed; opacity: .65; }
+.ftu-auth-screen { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+.ftu-auth-card { background: white; padding: 34px; width: min(100%, 490px); border: 1px solid #E6E8EE; border-radius: 12px; box-shadow: 0 14px 40px rgba(20,23,31,.07); }
+.ftu-auth-card h1 { font-size: 26px; line-height: 1.2; margin: 24px 0 8px; }
+.ftu-auth-card p { color: #5B6472; font-size: 14px; line-height: 1.55; }
+.ftu-brand { display: flex; gap: 12px; align-items: center; font-size: 16px; font-weight: 750; }
+.ftu-brand img { width: 50px; height: 50px; object-fit: contain; }
+.ftu-stack { display: flex; flex-direction: column; gap: 16px; }
+.ftu-stack label, .ftu-project-list label { display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 600; }
+.ftu-stack input:not([type=checkbox]), .ftu-stack select, .ftu-stack textarea, .ftu-project-list input {
+ width: 100%; background: #fff; border: 1px solid #CCD3DF; border-radius: 8px; padding: 10px 12px; color: #14171F; min-height: 42px; font-size: 14px;
+}
+.ftu-stack textarea { resize: vertical; min-height: 68px; }
+.ftu-stack input:focus, .ftu-stack select:focus, .ftu-stack textarea:focus, .ftu-project-list input:focus { outline: 2px solid #5B4BC4; outline-offset: 1px; }
+.ftu-stack button:not(.ftu-subtle):not(.ftu-secondary), .ftu-savebar button { background: #5B4BC4; color: #FFF; border: 1px solid #5B4BC4; border-radius: 8px; padding: 11px 20px; font-weight: 700; }
+.ftu-stack button.ftu-subtle, .ftu-account .ftu-subtle, .ftu-subtle { border: 0; background: transparent; color: #5B4BC4; font-size: 13px; padding: 8px; }
+.ftu-error { color: #B91C1C !important; font-weight: 600; font-size: 13px; }
+.ftu-success { color: #237648; font-weight: 600; font-size: 13px; }
+.ftu-topbar { background: #FFFFFF; border-bottom: 1px solid #E6E8EE; min-height: 76px; padding: 10px max(30px,calc((100vw - 1440px)/2)); display: flex; gap: 20px; align-items: center; justify-content: space-between; }
+.ftu-account { display: flex; align-items: center; gap: 16px; font-size: 13px; color: #5B6472; }
+.ftu-nav { display: flex; gap: 8px; align-items: center; padding: 14px max(30px,calc((100vw - 1440px)/2)); background: #FFF; border-bottom: 1px solid #E6E8EE; }
+.ftu-nav button { border: 0; padding: 10px 16px; border-radius: 8px; background: transparent; color: #5B6472; font-size: 14px; font-weight: 600; }
+.ftu-nav button.active { background: #F0EEFF; color: #5B4BC4; }
+.ftu-content { max-width: 1480px; margin: 0 auto; padding: 28px 26px 60px; }
+.ftu-heading { display:flex; justify-content:space-between; gap: 16px; align-items: center; margin-bottom: 22px; }
+.ftu-heading h1 { font-size: 28px; margin: 0 0 6px; }
+.ftu-heading p, .ftu-detail-title p { color:#5B6472; font-size:14px; margin: 0; }
+.ftu-heading>span { color:#5B6472; font-size: 13px; }
+.ftu-panel { background: #FFF; border: 1px solid #E6E8EE; border-radius: 12px; padding: 22px; box-shadow: 0 4px 14px rgba(20,23,31,.025); }
+.ftu-project-grid { display: grid; grid-template-columns: 285px minmax(0,1fr); gap: 20px; align-items: start; }
+.ftu-project-list { display: flex; flex-direction: column; gap: 9px; max-height: calc(100vh - 220px); overflow-y: auto; }
+.ftu-project-list label { margin-bottom: 12px; }
+.ftu-project-item { text-align: left; display: flex; flex-direction: column; gap: 5px; border: 1px solid transparent; background: #fff; padding: 12px; border-radius: 9px; color: #14171F; }
+.ftu-project-item strong { color: #5B4BC4; font-size: 13px; }
+.ftu-project-item span { font-size: 14px; line-height: 1.4; }
+.ftu-project-item small { font-size: 12px; color: #5B6472; }
+.ftu-project-item:hover { background: #F8F7FF; }
+.ftu-project-item.selected { background: #F3F1FF; border-color: #C9C1F4; }
+.ftu-detail-title { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:20px; border-bottom:1px solid #E6E8EE; }
+.ftu-detail-title h2 { font-size: 22px; margin: 7px 0; }
+.ftu-eyebrow { color: #5B4BC4; font-size: 12px; font-weight: 700; }
+.ftu-mini-pill { padding: 7px 11px; border-radius:99px; font-size:12px; white-space:nowrap; font-weight:700; }
+.ftu-mini-pill.on_track { background:#E7F5EC; color:#14532D; }
+.ftu-mini-pill.at_risk { background:#FFF0CB; color:#7A5200; }
+.ftu-mini-pill.delayed { background:#FDE1E1; color:#B91C1C; }
+.ftu-detail fieldset { margin: 0; border:0; padding:0; min-width:0; }
+.ftu-section-heading { font-size: 15px; font-weight:750; border-bottom:1px solid #E6E8EE; margin: 14px 0 16px; padding-bottom: 10px; }
+.ftu-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:15px; }
+.ftu-fields .ftu-wide { grid-column:1/-1; }
+.ftu-assignments { display:flex; flex-direction:column; gap:10px; }
+.ftu-assignment { display:flex; gap:14px; padding:10px 12px; border:1px solid #E6E8EE; border-radius:8px; align-items:center; justify-content:space-between; }
+.ftu-assignment span { margin-right:auto; font-size:14px; }
+.ftu-assignment label { max-width:140px; }
+.ftu-alert-edit { display:grid; grid-template-columns:2fr 1fr 1fr auto auto; gap:10px; align-items:end; padding:12px 0; border-bottom:1px solid #E6E8EE; }
+.ftu-stack label.ftu-checkbox { display:flex; flex-direction:row; align-items:center; gap:6px; padding: 12px 0; white-space:nowrap; }
+.ftu-stack .ftu-secondary { display: inline-block; align-self:flex-start; border:1px solid #5B4BC4; color:#5B4BC4; background:#fff; font-size:13px; font-weight:700; padding:9px 12px; border-radius:7px; }
+.ftu-notes article { padding:12px 0; border-bottom:1px solid #E6E8EE; font-size:13px; }
+.ftu-notes article span { color:#5B6472; }
+.ftu-notes article p { white-space: pre-wrap; line-height:1.55; }
+.ftu-savebar { display:flex; gap:12px; justify-content:flex-end; align-items:center; border-top:1px solid #E6E8EE; padding-top:20px; }
+.ftu-savebar span { margin-right:auto; color:#5B6472; font-size:12px; }
+.ftu-workbench .demo-viewport { margin: 0 auto; }
+@media(max-width:960px) { .ftu-project-grid { grid-template-columns:1fr; } .ftu-project-list { max-height:300px; } .ftu-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } .ftu-alert-edit { grid-template-columns:repeat(2,minmax(0,1fr)); } .ftu-topbar { padding:10px 20px; } .ftu-nav { padding:10px 20px; overflow-x:auto; } }
+@media(max-width:560px) { .ftu-fields,.ftu-alert-edit { grid-template-columns:1fr; } .ftu-account span { display:none; } .ftu-content { padding:18px 12px; } .ftu-panel { padding:16px; } .ftu-detail-title,.ftu-savebar { flex-wrap:wrap; } }
