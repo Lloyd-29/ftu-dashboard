@@ -1,0 +1,9 @@
+# M3 private PDF volume, automatically merged with compose.yaml.
+# Do not expose this volume through nginx or frontend/dist.
+services:
+  app:
+    volumes:
+      - ftu_uploads:/var/www/html/storage/app/private
+
+volumes:
+  ftu_uploads:
