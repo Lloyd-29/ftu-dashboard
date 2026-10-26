@@ -9,6 +9,7 @@ import DashboardFooter from './components/DashboardFooter';
 import type { DashboardData } from './types/dashboard';
 import './App.css';
 import './components/DemoViewport.css';
+import './engineering/dashboard-operations.css';
 
 const PAGES = ['Ringkasan', 'Progres & Jadwal', 'Beban Kerja', 'Catatan Klien'] as const;
 const POLL_INTERVAL_MS = 45_000;
@@ -23,21 +24,16 @@ function useDashboard() {
   useEffect(() => {
     let mounted = true;
     let pending: AbortController | null = null;
-
     async function refresh(): Promise<void> {
       if (pending) return;
       const request = new AbortController();
       pending = request;
       const timeout = window.setTimeout(() => request.abort(), 8_000);
       try {
-        const response = await fetch('/api/dashboard', {
-          cache: 'no-store', signal: request.signal,
-        });
+        const response = await fetch('/api/dashboard', {cache:'no-store',signal:request.signal});
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload: DashboardData = await response.json();
-        if (!payload.summary || !Array.isArray(payload.projects)) {
-          throw new Error('Invalid dashboard payload');
-        }
+        if (!payload.summary || !Array.isArray(payload.projects)) throw new Error('Invalid dashboard payload');
         if (mounted) {
           setData(payload);
           setLastReceivedAt(new Date());
@@ -50,16 +46,10 @@ function useDashboard() {
         if (pending === request) pending = null;
       }
     }
-
     void refresh();
     const interval = window.setInterval(() => { void refresh(); }, POLL_INTERVAL_MS);
-    return () => {
-      mounted = false;
-      window.clearInterval(interval);
-      pending?.abort();
-    };
+    return () => { mounted = false; window.clearInterval(interval); pending?.abort(); };
   }, []);
-
   return { data, offline, lastReceivedAt };
 }
 
@@ -83,18 +73,15 @@ export default function App() {
     const tick = window.setInterval(() => setNow(new Date()), 1_000);
     return () => window.clearInterval(tick);
   }, []);
-
   useEffect(() => {
     const resize = () => setScale(readScale());
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, []);
-
   useEffect(() => {
     remainingRef.current = rotationMs;
     setRemainingMs(rotationMs);
   }, [page, rotationMs]);
-
   useEffect(() => {
     if (paused) return;
     let previous = Date.now();
@@ -104,49 +91,35 @@ export default function App() {
       previous = current;
       remainingRef.current = Math.max(0, remainingRef.current - delta);
       setRemainingMs(remainingRef.current);
-      if (remainingRef.current === 0) {
-        setPage((currentPage) => (currentPage + 1) % PAGES.length);
-      }
+      if (remainingRef.current === 0) setPage((currentPage) => (currentPage + 1) % PAGES.length);
     }, 250);
     return () => window.clearInterval(ticker);
   }, [page, paused, rotationMs]);
-
-  // DEMO-ONLY: Keyboard-only controls for the supervisor's laptop demo.
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        setPage((current) => (current + 1) % PAGES.length);
-      } else if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        setPage((current) => (current - 1 + PAGES.length) % PAGES.length);
-      } else if (event.key.toLowerCase() === 'p') {
-        event.preventDefault();
-        setPaused((current) => !current);
-      }
+      if (event.key === 'ArrowRight') { event.preventDefault(); setPage((current) => (current + 1) % PAGES.length); }
+      else if (event.key === 'ArrowLeft') { event.preventDefault(); setPage((current) => (current - 1 + PAGES.length) % PAGES.length); }
+      else if (event.key.toLowerCase() === 'p') { event.preventDefault(); setPaused((current) => !current); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
   const viewportStyle = { '--stage-scale': scale } as CSSProperties;
-
   return (
     <div className="demo-viewport" style={viewportStyle}>
       <div className="demo-stage-holder">
         <div className={`dashboard-shell${isLite ? ' lite' : ''}`}>
-          <DashboardHeader
-            pages={PAGES}
-            activePage={page}
-            now={now}
-            lastUpdatedAt={data?.last_updated_at ?? null}
-            hasData={data !== null}
-            disconnected={disconnected}
-            paused={paused}
-          />
-
-          <main key={page} className="slide-view" aria-label={PAGES[page]}>
+          <DashboardHeader pages={PAGES} activePage={page} now={now}
+            lastUpdatedAt={data?.last_updated_at ?? null} hasData={data !== null}
+            disconnected={disconnected} paused={paused} />
+          <main key={page} className={`slide-view${data && page===0?' slide-view--m3':''}`} aria-label={PAGES[page]}>
+            {data && page===0 && <div className="ftu-operations-strip" aria-label="Ringkasan kerja tim">
+              <span>Dokumen menunggu review: <strong>{data.summary.documents_pending_review ?? 0}</strong></span>
+              <span>Verifikasi lapangan terjadwal: <strong>{data.summary.scheduled_field_verifications ?? 0}</strong></span>
+              <span>Tugas terlambat: <strong>{data.summary.overdue_tasks ?? 0}</strong></span>
+            </div>}
             {!data ? (
               <section className="placeholder-card" role="status">
                 {offline ? 'API belum dapat dihubungi. Periksa koneksi Laravel.' : 'Memuat data dashboard...'}
@@ -161,14 +134,8 @@ export default function App() {
               <ClientNotesSlide data={data} now={now} remainingMs={remainingMs} rotationMs={rotationMs} />
             )}
           </main>
-
-          <DashboardFooter
-            page={page}
-            pageCount={PAGES.length}
-            remainingMs={remainingMs}
-            rotationMs={rotationMs}
-            paused={paused}
-          />
+          <DashboardFooter page={page} pageCount={PAGES.length}
+            remainingMs={remainingMs} rotationMs={rotationMs} paused={paused} />
         </div>
       </div>
     </div>

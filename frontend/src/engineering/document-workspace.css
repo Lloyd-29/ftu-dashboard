@@ -1,0 +1,45 @@
+/* M3 documentation workbench only; dashboard slideshow styles are unchanged. */
+.ftu-doc-workspace { display:flex; flex-direction:column; gap:20px; }
+.ftu-doc-workspace .ftu-heading { margin-bottom:0; }
+.ftu-doc-workspace h2 { margin:0 0 18px; font-size:19px; }
+.ftu-doc-workspace h3 { margin:22px 0 12px; font-size:16px; }
+.ftu-doc-fields { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; align-items:end; }
+.ftu-doc-fields label, .ftu-doc-filters label { display:flex; flex-direction:column; gap:7px; font-size:13px; font-weight:650; color:#344054; }
+.ftu-doc-fields input,.ftu-doc-fields select,.ftu-doc-fields textarea,.ftu-doc-filters select,.ftu-doc-types textarea,.ftu-doc-review textarea { font:inherit; color:#14171F; background:#FFF; border:1px solid #C9D1DD; border-radius:8px; padding:10px 12px; min-width:0; min-height:42px; }
+.ftu-doc-fields input,.ftu-doc-fields select,.ftu-doc-fields textarea { width:100%; }
+.ftu-doc-fields input[type=file] { padding:8px; font-size:12px; }
+.ftu-doc-fields textarea { resize:vertical; min-height:70px; }
+.ftu-doc-wide { grid-column:span 2; }
+.ftu-doc-actions { display:flex; align-items:flex-end; height:100%; }
+.ftu-doc-actions button,.ftu-doc-review button,.ftu-doc-types .ftu-panel button { border:0; background:#5B4BC4; color:#FFF; padding:11px 14px; border-radius:8px; font-size:13px; font-weight:700; }
+.ftu-doc-types .ftu-panel { display:grid; gap:12px; margin-top:10px; }
+.ftu-doc-types .ftu-panel p { margin:0; color:#5B6472; font-size:13px; }
+.ftu-doc-types .ftu-panel textarea { width:100%; }
+.ftu-doc-types .ftu-panel button { justify-self:start; }
+.ftu-doc-grid { display:grid; grid-template-columns:335px minmax(0,1fr); gap:20px; align-items:start; }
+.ftu-doc-filters { display:flex; gap:8px; margin-bottom:15px; }
+.ftu-doc-filters label { flex:1; min-width:0; }
+.ftu-doc-list { display:flex; flex-direction:column; gap:8px; }
+.ftu-doc-item { text-align:left; display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid #E6E8EE; border-radius:9px; background:#FFF; color:#14171F; }
+.ftu-doc-item.selected { border-color:#5B4BC4; background:#F3F1FF; }
+.ftu-doc-item strong { font-size:12px; color:#5B4BC4; overflow-wrap:anywhere; }
+.ftu-doc-item span { font-size:13px; font-weight:650; }
+.ftu-doc-item small { font-size:11px; color:#5B6472; }
+.ftu-doc-table { width:100%; border-collapse:collapse; min-width:750px; font-size:12px; text-align:left; }
+.ftu-doc-table th { padding:12px; color:#5B6472; background:#F6F7FA; border-bottom:1px solid #E6E8EE; }
+.ftu-doc-table td { padding:12px; border-bottom:1px solid #E6E8EE; vertical-align:top; line-height:1.55; }
+.ftu-doc-table td small { display:block; font-size:11px; color:#5B6472; margin-top:6px; }
+.ftu-doc-table td a { display:block; color:#5B4BC4; font-weight:700; margin-top:9px; }
+.ftu-doc-pill { display:inline-flex; border-radius:100px; font-size:11px; padding:5px 9px; font-weight:700; }
+.ftu-doc-pill.submitted { color:#7A5200; background:#FFF0CB; }
+.ftu-doc-pill.revision_needed { color:#B91C1C; background:#FDE1E1; }
+.ftu-doc-pill.checked { color:#14532D; background:#E7F5EC; }
+.ftu-doc-review { display:flex; flex-direction:column; gap:7px; margin-top:12px; }
+.ftu-doc-review textarea { width:100%; min-width:150px; min-height:60px; resize:vertical; }
+.ftu-doc-review button.ftu-doc-secondary { background:#FFF; color:#5B4BC4; border:1px solid #5B4BC4; }
+.ftu-doc-workspace .ftu-doc-danger { margin-top:9px; background:none; border:0; color:#B91C1C; font-size:11px; padding:4px; }
+.ftu-doc-review-note { color:#B91C1C !important; white-space:pre-wrap; }
+.ftu-doc-revise { margin-top:24px; padding-top:15px; border-top:1px solid #E6E8EE; }
+.ftu-doc-workspace .ftu-helper { margin:14px 0; }
+@media(max-width:1100px) { .ftu-doc-grid { grid-template-columns:1fr; } .ftu-doc-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .ftu-doc-fields { grid-template-columns:1fr; } .ftu-doc-wide { grid-column:1; } .ftu-doc-filters { flex-direction:column; } }

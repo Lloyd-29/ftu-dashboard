@@ -1,0 +1,6 @@
+/* Three small operational counts on Slide 1; no existing slide component changes. */
+.slide-view--m3 { display:flex; flex-direction:column; gap:10px; }
+.slide-view--m3 > .rs-layout { flex:1 1 auto; min-height:0; height:auto; }
+.ftu-operations-strip { flex:0 0 35px; display:flex; gap:10px; align-items:center; justify-content:center; overflow:hidden; font-size:17px; font-weight:550; color:#14171F; }
+.ftu-operations-strip span { display:inline-flex; align-items:center; justify-content:center; background:#FFFFFF; border:1px solid #D7DDE5; border-radius:10px; padding:4px 22px; white-space:nowrap; }
+.ftu-operations-strip strong { margin-left:8px; font-size:20px; font-weight:800; color:#5B4BC4; font-variant-numeric:tabular-nums; }

@@ -4,13 +4,14 @@ import { api, csrf, type User } from './api';
 import ProjectWorkspace from './ProjectWorkspace';
 import TaskWorkspace from './TaskWorkspace';
 import FieldVerificationWorkspace from './FieldVerificationWorkspace';
+import DocumentWorkspace from './DocumentWorkspace';
 import './engineering.css';
 import './team-workspace.css';
 
 type Path = 'dashboard'|'proyek'|'tugas'|'verifikasi'|'dokumen';
 function currentPath():Path {
   const path=window.location.pathname.replace(/^\//,'');
-  return ['dashboard','proyek','tugas','verifikasi','dokumen'].includes(path) ? path as Path : 'dashboard';
+  return ['dashboard','proyek','tugas','verifikasi','dokumen'].includes(path) ? path as Path : 'proyek';
 }
 const labels:Record<Path,string>={dashboard:'Dashboard',proyek:'Proyek',tugas:'Tugas',verifikasi:'Verifikasi',dokumen:'Dokumen'};
 
@@ -25,6 +26,7 @@ export default function EngineeringRoot() {
   const [newPassword,setNewPassword]=useState('');
   const [confirmation,setConfirmation]=useState('');
   const [sending,setSending]=useState(false);
+  const [pendingDocs,setPendingDocs]=useState(0);
 
   useEffect(()=>{
     let live=true;
@@ -34,6 +36,17 @@ export default function EngineeringRoot() {
     window.addEventListener('popstate',onPop);
     return ()=>{live=false;window.removeEventListener('popstate',onPop);};
   },[]);
+
+  useEffect(()=>{
+    if(!user || !['admin','coordinator','director'].includes(user.role) || user.must_change_password)return;
+    let live=true;
+    const refresh=()=>{void api<{pending_review_count:number}>('/api/documents').then(r=>{
+      if(live)setPendingDocs(r.pending_review_count);
+    }).catch(()=>{ /* Keep last badge until next refresh. */ });};
+    refresh();
+    const timer=window.setInterval(refresh,60000);
+    return ()=>{live=false;window.clearInterval(timer);};
+  },[user?.id,user?.role,user?.must_change_password]);
 
   function navigate(next:Path) {
     if(path===next)return;
@@ -62,7 +75,7 @@ export default function EngineeringRoot() {
   if(pending)return <div className="engineering-root"><div className="ftu-auth-card">Memeriksa sesi…</div></div>;
   if(!user||user.must_change_password)return <div className="engineering-root ftu-auth-screen">
     <div className="ftu-auth-card">
-      <div className="ftu-brand"><img src="/ftu-logo1.png" alt="Logo FTU"/><span>PT Filosofi Teknik Utama</span></div>
+      <div className="ftu-brand"><img src="/ftu-logo.png" alt="Logo FTU"/><span>PT Filosofi Teknik Utama</span></div>
       <h1>{user?'Ganti kata sandi sementara':'Masuk ke Engineering System'}</h1>
       <p>{user?'Gunakan kata sandi baru minimal 10 karakter.':'Gunakan username dan kata sandi yang diberikan administrator.'}</p>
       <form onSubmit={user?changePassword:login} className="ftu-stack">
@@ -80,17 +93,21 @@ export default function EngineeringRoot() {
       </form>
     </div>
   </div>;
-  if(user.role==='viewer')return <App/>;
-  const canEdit=['admin','coordinator','director'].includes(user.role);
-  const nav:Path[]=canEdit?['dashboard','proyek','tugas','verifikasi','dokumen']:['proyek','tugas','verifikasi','dokumen'];
+  if (user.role === 'viewer') return <App />;
+
+const canEdit = ['admin', 'coordinator', 'director'].includes(user.role);
+
+const nav: Path[] = canEdit
+  ? ['dashboard', 'proyek', 'tugas', 'verifikasi', 'dokumen']
+  : ['proyek', 'tugas', 'verifikasi', 'dokumen'];
   const visible=nav.includes(path)?path:'proyek';
   return <div className="engineering-root ftu-workbench">
     <header className="ftu-topbar">
       <div className="ftu-brand"><img src="/ftu-logo1.png" alt="Logo FTU"/><span>PT Filosofi Teknik Utama</span></div>
       <div className="ftu-account"><span>{user.name} · {user.role}</span><button type="button" className="ftu-subtle" onClick={logout}>Keluar</button></div>
     </header>
-    <nav className="ftu-nav" aria-label="Menu utama">{nav.map(item=><button key={item} type="button" onClick={()=>navigate(item)} className={visible===item?'active':''}>{labels[item]}</button>)}</nav>
+    <nav className="ftu-nav" aria-label="Menu utama">{nav.map(item=><button key={item} type="button" onClick={()=>navigate(item)} className={visible===item?'active':''}>{labels[item]}{item==='dokumen'&&canEdit&&pendingDocs>0?` · ${pendingDocs}`:''}</button>)}</nav>
     {visible==='dashboard'? <App/> : visible==='proyek'? <ProjectWorkspace canEdit={canEdit}/>: visible==='tugas'? <TaskWorkspace canManage={canEdit}/>: visible==='verifikasi'? <FieldVerificationWorkspace canManage={canEdit}/>:
-      <main className="ftu-content"><section className="ftu-panel"><h1>{labels[visible]}</h1><p>Modul ini tersedia pada milestone berikutnya. Data proyek dan dashboard tetap bisa digunakan.</p></section></main>}
+      <DocumentWorkspace canManage={canEdit} canDelete={user.role==='coordinator'||user.role==='admin'} onPendingChange={setPendingDocs}/>}
   </div>;
 }

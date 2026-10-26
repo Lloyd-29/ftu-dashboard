@@ -12,14 +12,18 @@ class ProjectNoteSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment('local')) {
+            throw new RuntimeException('Demo notes may only be seeded locally.');
+        }
+
+        // M1 uses username login; older demo accounts may still have the legacy email.
         $author = User::query()
-            ->where('email', 'engineering@ftu-demo.test')
+            ->where('username', 'engineering')
+            ->orWhere('email', 'engineering@ftu-demo.test')
             ->first();
 
         if ($author === null) {
-            throw new RuntimeException(
-                'Demo engineering user not found.'
-            );
+            throw new RuntimeException('Demo engineering user not found.');
         }
 
         $notes = [
@@ -57,10 +61,7 @@ class ProjectNoteSeeder extends Seeder
             ],
         ];
 
-        $dates = [
-            '2026-10-09',
-            '2026-10-16',
-        ];
+        $dates = ['2026-10-09', '2026-10-16'];
 
         foreach ($notes as $projectCode => $projectNotes) {
             $project = Project::query()
@@ -68,9 +69,7 @@ class ProjectNoteSeeder extends Seeder
                 ->first();
 
             if ($project === null) {
-                throw new RuntimeException(
-                    "Project not found: {$projectCode}"
-                );
+                throw new RuntimeException("Project not found: {$projectCode}");
             }
 
             foreach ($projectNotes as $index => $body) {

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Alert;
 use App\Models\Engineer;
+use App\Models\DocumentRevision;
+use App\Models\FieldVerification;
+use App\Models\Task;
 use App\Models\Milestone;
 use App\Models\ProgressPoint;
 use App\Models\Project;
@@ -107,6 +110,9 @@ final class DashboardController extends Controller
             Alert::query()->max('updated_at'),
             Engineer::query()->max('updated_at'),
             Setting::query()->max('updated_at'),
+            DocumentRevision::query()->max('updated_at'),
+            Task::query()->max('updated_at'),
+            FieldVerification::query()->max('updated_at'),
         ])->filter()->max();
 
         return response()->json([
@@ -125,6 +131,11 @@ final class DashboardController extends Controller
                 'findings_open' => $projects->sum('findings_open'),
                 'findings_closed' => $projects->sum('findings_closed'),
                 'active_alerts' => $alerts->count(),
+                'documents_pending_review' => DocumentRevision::query()->where('status', 'submitted')->count(),
+                'scheduled_field_verifications' => FieldVerification::query()
+                    ->where('review_status', 'pending')->whereDate('visit_date', '>=', $today->toDateString())->count(),
+                'overdue_tasks' => Task::query()->where('status', '!=', 'done')
+                    ->whereDate('due_date', '<', $today->toDateString())->count(),
             ],
             'projects' => $projects->map(fn (Project $project): array => [
                 'code' => $project->code,

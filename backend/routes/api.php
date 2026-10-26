@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\FieldVerificationController;
@@ -26,6 +27,17 @@ Route::middleware(['auth:sanctum','password.changed'])->group(function (): void 
     Route::post('/tasks', [TaskController::class, 'store']);
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+
+    // Static routes precede model-bound routes.
+    Route::get('/documents/types', [DocumentController::class, 'types']);
+    Route::put('/documents/types', [DocumentController::class, 'updateTypes']);
+    Route::get('/documents', [DocumentController::class, 'index']);
+    Route::post('/documents', [DocumentController::class, 'store']);
+    Route::get('/documents/{document}', [DocumentController::class, 'show']);
+    Route::post('/documents/{document}/revisions', [DocumentController::class, 'addRevision']);
+    Route::patch('/document-revisions/{revision}/review', [DocumentController::class, 'review']);
+    Route::get('/document-revisions/{revision}/download', [DocumentController::class, 'download']);
+    Route::delete('/document-revisions/{revision}', [DocumentController::class, 'destroyRevision']);
 
     Route::get('/field-verifications/candidates', [FieldVerificationController::class, 'candidates']);
     Route::get('/field-verifications', [FieldVerificationController::class, 'index']);
