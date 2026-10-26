@@ -1,0 +1,26 @@
+.ftu-finishing .ftu-panel { overflow: hidden; }
+.ftu-filters { display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:22px; }
+.ftu-filters label { display:flex;flex-direction:column;gap:6px;min-width:180px;max-width:330px;flex:1;font-size:13px;font-weight:650;color:#384255; }
+.ftu-filters input,.ftu-filters select {height:42px;width:100%;border:1px solid #CCD3DF;border-radius:8px;background:#FFF;color:#14171F;padding:8px 11px;font-size:14px;}
+.ftu-outline-button {height:42px;border:1px solid #5B4BC4;border-radius:8px;padding:8px 14px;background:#FFF;color:#5B4BC4;font-weight:650;font-size:13px;}
+.ftu-table-scroll {max-width:100%;overflow-x:auto;}
+.ftu-data-table {width:100%;border-collapse:collapse;text-align:left;font-size:13px;min-width:830px;}
+.ftu-data-table th {padding:13px 12px;background:#F5F6FA;color:#5B6472;border-bottom:1px solid #E6E8EE;white-space:nowrap;font-weight:700;}
+.ftu-data-table td {padding:14px 12px;border-bottom:1px solid #E6E8EE;vertical-align:top;line-height:1.55;}
+.ftu-data-table td small {display:block;color:#5B6472;margin-top:4px;}
+.ftu-diff {display:flex;flex-wrap:wrap;gap:8px;max-width:520px;word-break:break-word;}
+.ftu-diff span:first-child {color:#697386;}
+.ftu-diff span:last-child {color:#14171F;}
+.ftu-pager {display:flex;justify-content:flex-end;gap:10px;align-items:center;padding-top:18px;font-size:13px;color:#5B6472;}
+.ftu-pager button,.ftu-action-cell button {border:1px solid #C9C1F4;color:#5B4BC4;background:#FFF;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:650;white-space:nowrap;}
+.ftu-pager button:disabled,.ftu-action-cell button:disabled {opacity:.45;cursor:not-allowed;}
+.ftu-action-cell {min-width:220px;}
+.ftu-action-cell button {margin:0 7px 7px 0;}
+.ftu-action-cell .danger {color:#B91C1C;border-color:#F1C6C6;}
+.ftu-account-status {display:inline-block;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;}
+.ftu-account-status.active {background:#E7F5EC;color:#166534;}
+.ftu-account-status.inactive {background:#F1F2F5;color:#5B6472;}
+.ftu-password-reveal {border:1px solid #D9C99A;border-radius:10px;background:#FFF9EB;padding:18px;margin-bottom:20px;display:flex;align-items:start;flex-direction:column;gap:9px;font-size:14px;}
+.ftu-password-reveal p {margin:0;color:#5B6472;}
+.ftu-password-reveal code {font-size:17px;padding:8px;background:#FFF;border-radius:7px;letter-spacing:1px;}
+.ftu-empty {padding:14px 0;color:#5B6472;font-size:14px;}

@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\FieldVerificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
-use App\Http\Controllers\Api\FieldVerificationController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -28,7 +30,6 @@ Route::middleware(['auth:sanctum','password.changed'])->group(function (): void 
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
 
-    // Static routes precede model-bound routes.
     Route::get('/documents/types', [DocumentController::class, 'types']);
     Route::put('/documents/types', [DocumentController::class, 'updateTypes']);
     Route::get('/documents', [DocumentController::class, 'index']);
@@ -44,4 +45,8 @@ Route::middleware(['auth:sanctum','password.changed'])->group(function (): void 
     Route::get('/field-verifications/{verification}', [FieldVerificationController::class, 'show']);
     Route::patch('/field-verifications/{verification}/submit', [FieldVerificationController::class, 'submit']);
     Route::patch('/field-verifications/{verification}/review', [FieldVerificationController::class, 'review']);
+
+    Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+    Route::get('/users', [AccountController::class, 'index']);
+    Route::patch('/users/{user}/deactivate', [AccountController::class, 'deactivate']);
 });

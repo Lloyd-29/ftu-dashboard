@@ -5,15 +5,17 @@ import ProjectWorkspace from './ProjectWorkspace';
 import TaskWorkspace from './TaskWorkspace';
 import FieldVerificationWorkspace from './FieldVerificationWorkspace';
 import DocumentWorkspace from './DocumentWorkspace';
+import HistoryWorkspace from './HistoryWorkspace';
+import AccountWorkspace from './AccountWorkspace';
 import './engineering.css';
 import './team-workspace.css';
 
-type Path = 'dashboard'|'proyek'|'tugas'|'verifikasi'|'dokumen';
+type Path = 'dashboard'|'proyek'|'tugas'|'verifikasi'|'dokumen'|'riwayat'|'akun';
 function currentPath():Path {
   const path=window.location.pathname.replace(/^\//,'');
-  return ['dashboard','proyek','tugas','verifikasi','dokumen'].includes(path) ? path as Path : 'proyek';
+  return ['dashboard','proyek','tugas','verifikasi','dokumen','riwayat','akun'].includes(path) ? path as Path : 'proyek';
 }
-const labels:Record<Path,string>={dashboard:'Dashboard',proyek:'Proyek',tugas:'Tugas',verifikasi:'Verifikasi',dokumen:'Dokumen'};
+const labels:Record<Path,string>={dashboard:'Dashboard',proyek:'Proyek',tugas:'Tugas',verifikasi:'Verifikasi',dokumen:'Dokumen',riwayat:'Riwayat',akun:'Akun'};
 
 export default function EngineeringRoot() {
   const [user,setUser]=useState<User|null>(null);
@@ -75,7 +77,7 @@ export default function EngineeringRoot() {
   if(pending)return <div className="engineering-root"><div className="ftu-auth-card">Memeriksa sesi…</div></div>;
   if(!user||user.must_change_password)return <div className="engineering-root ftu-auth-screen">
     <div className="ftu-auth-card">
-      <div className="ftu-brand"><img src="/ftu-logo.png" alt="Logo FTU"/><span>PT Filosofi Teknik Utama</span></div>
+      <div className="ftu-brand"><img src="/ftu-logo1.png" alt="Logo FTU"/><span>PT Filosofi Teknik Utama</span></div>
       <h1>{user?'Ganti kata sandi sementara':'Masuk ke Engineering System'}</h1>
       <p>{user?'Gunakan kata sandi baru minimal 10 karakter.':'Gunakan username dan kata sandi yang diberikan administrator.'}</p>
       <form onSubmit={user?changePassword:login} className="ftu-stack">
@@ -93,13 +95,9 @@ export default function EngineeringRoot() {
       </form>
     </div>
   </div>;
-  if (user.role === 'viewer') return <App />;
-
-const canEdit = ['admin', 'coordinator', 'director'].includes(user.role);
-
-const nav: Path[] = canEdit
-  ? ['dashboard', 'proyek', 'tugas', 'verifikasi', 'dokumen']
-  : ['proyek', 'tugas', 'verifikasi', 'dokumen'];
+  if(user.role==='viewer')return <App/>;
+  const canEdit=['admin','coordinator','director'].includes(user.role);
+  const nav:Path[]=canEdit?['dashboard','proyek','tugas','verifikasi','dokumen','riwayat',...(['admin','coordinator'].includes(user.role)?['akun' as Path]:[])]:['proyek','tugas','verifikasi','dokumen'];
   const visible=nav.includes(path)?path:'proyek';
   return <div className="engineering-root ftu-workbench">
     <header className="ftu-topbar">
@@ -108,6 +106,7 @@ const nav: Path[] = canEdit
     </header>
     <nav className="ftu-nav" aria-label="Menu utama">{nav.map(item=><button key={item} type="button" onClick={()=>navigate(item)} className={visible===item?'active':''}>{labels[item]}{item==='dokumen'&&canEdit&&pendingDocs>0?` · ${pendingDocs}`:''}</button>)}</nav>
     {visible==='dashboard'? <App/> : visible==='proyek'? <ProjectWorkspace canEdit={canEdit}/>: visible==='tugas'? <TaskWorkspace canManage={canEdit}/>: visible==='verifikasi'? <FieldVerificationWorkspace canManage={canEdit}/>:
+      visible==='riwayat'? <HistoryWorkspace canManageAccounts={user.role==='admin'||user.role==='coordinator'}/> : visible==='akun'? <AccountWorkspace currentUserId={user.id}/> :
       <DocumentWorkspace canManage={canEdit} canDelete={user.role==='coordinator'||user.role==='admin'} onPendingChange={setPendingDocs}/>}
   </div>;
 }
