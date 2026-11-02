@@ -1,0 +1,114 @@
+/*
+ * FTU Engineering System — Hybrid FTU color tokens v1.0
+ * Scope: Engineering Workbench ONLY. Never import from App.css or dashboard styles.
+ * Palette approved for visual design. This file contains tokens, no layout rules.
+ * Import near EngineeringRoot styles when implementing color mapping.
+ * Existing M1–M4 CSS still has literal hex codes, so importing this file alone
+ * intentionally does not change the visible UI.
+ */
+.engineering-root {
+  color-scheme: light;
+
+  /* 01. Immutable FTU brand reference */
+  --ftu-brand-red: #D62B1F;
+  --ftu-brand-red-hover: #B72218;
+  --ftu-brand-red-soft: #FBE9E7;
+  --ftu-brand-red-on: #FFFFFF;
+
+  /* 02. Dark shell (navigation and app chrome, layout undecided) */
+  --ftu-shell-bg: #171A1F;
+  --ftu-shell-raised: #1E232B;
+  --ftu-shell-hover: #292F38;
+  --ftu-shell-border: #2A313C;
+  --ftu-shell-text: #F3F5F7;
+  --ftu-shell-muted: #A6B0BD;
+  --ftu-shell-active-bg: #353139;
+  --ftu-shell-active-text: #FFFFFF;
+  --ftu-shell-active-indicator: var(--ftu-brand-red);
+
+  /* 03. Light workbench */
+  --ftu-workspace-bg: #F6F4EF;
+  --ftu-workspace-surface: #FFFEFC;
+  --ftu-workspace-card: #FFFFFF;
+  --ftu-workspace-muted: #F0EEE9;
+  --ftu-workspace-border: #E3E6EB;
+  --ftu-workspace-border-strong: #D5DAE1;
+  --ftu-workspace-divider: #E9E7E2;
+
+  /* 04. Type and legibility */
+  --ftu-text-primary: #14171F;
+  --ftu-text-secondary: #5E6775;
+  --ftu-text-tertiary: #7D8794; /* Decorative/large text only, NOT regular small text */
+  --ftu-text-inverse: #F5F7FA;
+  --ftu-text-disabled: #66707D;
+
+  /* 05. Industrial character: decorative/accent only */
+  --ftu-brass: #B78A2C;
+  --ftu-brass-soft: #F3E6C5;
+  --ftu-brass-ink: #745313; /* readable text on light brass surfaces */
+
+  /* 06. Semantics: project statuses */
+  --ftu-status-on-track-bg: #EAF6EF;
+  --ftu-status-on-track-text: #256B45;
+  --ftu-status-on-track-dot: #2F8A57;
+  --ftu-status-at-risk-bg: #FFF4DF;
+  --ftu-status-at-risk-text: #8A5B00;
+  --ftu-status-at-risk-dot: #D89A1D;
+  --ftu-status-delayed-bg: #FCE8E7;
+  --ftu-status-delayed-text: #A52A1F;
+  --ftu-status-delayed-dot: #D62B1F;
+  --ftu-status-stale-bg: #F0F1F3;
+  --ftu-status-stale-text: #505967;
+  --ftu-status-stale-dot: #88929F;
+
+  /* 07. Semantics: severity, review, and task feedback */
+  --ftu-status-info-bg: #EAF1FF;
+  --ftu-status-info-text: #355CA8;
+  --ftu-status-info-dot: #5377C4;
+  --ftu-status-warning-bg: #FFF4DF;
+  --ftu-status-warning-text: #8A5B00;
+  --ftu-status-warning-dot: #D89A1D;
+  --ftu-status-critical-bg: #FCE8E7;
+  --ftu-status-critical-text: #A52A1F;
+  --ftu-status-critical-dot: #D62B1F;
+  --ftu-status-success-bg: #EAF6EF;
+  --ftu-status-success-text: #256B45;
+  --ftu-status-success-dot: #2F8A57;
+  --ftu-status-neutral-bg: #F0F1F3;
+  --ftu-status-neutral-text: #505967;
+
+  /* 08. Action surfaces */
+  --ftu-action-primary-bg: var(--ftu-brand-red);
+  --ftu-action-primary-hover: var(--ftu-brand-red-hover);
+  --ftu-action-primary-text: var(--ftu-brand-red-on);
+  --ftu-action-secondary-bg: #FFFFFF;
+  --ftu-action-secondary-hover: #F7F8FA;
+  --ftu-action-secondary-border: #D5DAE1;
+  --ftu-action-secondary-text: #1C2430;
+  --ftu-action-subtle-bg: transparent;
+  --ftu-action-subtle-hover: #F1F3F6;
+  --ftu-action-subtle-text: #5E6775;
+  --ftu-action-danger-bg: #B42318;
+  --ftu-action-danger-hover: #911D16;
+  --ftu-action-danger-text: #FFFFFF;
+  --ftu-action-disabled-bg: #E7E8EA;
+  --ftu-action-disabled-text: #66707D;
+
+  /* 09. Field, selection, row hover, keyboard focus */
+  --ftu-field-bg: #FFFFFF;
+  --ftu-field-border: #D5DAE1;
+  --ftu-field-border-hover: #A7AFBA;
+  --ftu-field-placeholder: #66707D;
+  --ftu-row-hover: #FAFBFC;
+  --ftu-row-selected: #FFF2EF;
+  --ftu-row-selected-border: var(--ftu-brand-red);
+  --ftu-focus-color: #D62B1F;
+  --ftu-focus-ring: 0 0 0 3px rgba(214, 43, 31, 0.20);
+
+  /* 10. Logo image must remain intact; use on plain white backing */
+  --ftu-logo-backing: #FFFFFF;
+  --ftu-logo-backing-border: #E3E6EB;
+
+  /* 11. Quiet depth — no glossy shadows */
+  --ftu-panel-shadow: 0 4px 16px rgba(20, 23, 31, 0.045);
+}
