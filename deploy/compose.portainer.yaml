@@ -1,0 +1,77 @@
+# Use in Portainer > Stacks > Add stack > Web editor.
+# Images are built first via SSH and MUST exist on the same Docker environment.
+# No source bind mounts, so it works with Portainer Community Edition.
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?set_mysql_database}
+      MYSQL_USER: ${MYSQL_USER:?set_mysql_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set_mysql_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set_mysql_root_password}
+      TZ: Asia/Jakarta
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", 'MYSQL_PWD="$${MYSQL_PASSWORD}" mysql -h 127.0.0.1 -u "$${MYSQL_USER}" -D "$${MYSQL_DATABASE}" -e "SELECT 1" >/dev/null 2>&1']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+    networks:
+      - data
+
+  app:
+    image: ftu-demo-app:${FTU_RELEASE_TAG:?set_release_tag}
+    restart: unless-stopped
+    environment:
+      APP_NAME: FTU Engineering System
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:?set_app_key}
+      APP_URL: ${APP_URL:?set_app_url}
+      APP_TIMEZONE: Asia/Jakarta
+      APP_LOCALE: id
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${MYSQL_DATABASE:?set_mysql_database}
+      DB_USERNAME: ${MYSQL_USER:?set_mysql_user}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?set_mysql_password}
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: "true"
+      SESSION_SAME_SITE: lax
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:?set_stateful_domains}
+      CACHE_STORE: database
+      FILESYSTEM_DISK: local
+    volumes:
+      - ftu_uploads:/var/www/html/storage/app/private
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - data
+
+  nginx:
+    image: ftu-demo-web:${FTU_RELEASE_TAG:?set_release_tag}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18081:80"
+    depends_on:
+      - app
+    networks:
+      data: {}
+      edge:
+        aliases:
+          - ftu-stage-web
+
+networks:
+  data:
+    internal: true
+  edge: {}
+
+volumes:
+  mysql_data: {}
+  ftu_uploads: {}
